@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه عدد بیان</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container expression-number-app">
+        <h2 class="app-title">محاسبه عدد بیان</h2>
+        <form id="expression-form" method="POST" action="/wp-content/uploads/data/save-expression-number.php">
+            <div class="input-box">
+                <input type="text" name="firstName" id="firstName" placeholder="نام (فارسی)" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="lastName" id="lastName" placeholder="نام خانوادگی (فارسی)" required>
+            </div>
+            <button type="submit" class="submit-btn">محاسبه</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        document.getElementById('expression-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+
+            if (!firstName || !lastName) {
+                showError("لطفاً نام و فامیل خود را وارد کنید.");
+                return;
+            }
+
+            const fullName = firstName + lastName;
+            let total = 0;
+
+            for (let char of fullName) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+
+            const expressionNumber = sumDigits(total);
+            const meaning = getExpressionMeaning(expressionNumber);
+
+            showError(`
+                <strong>عدد بیان شما:</strong> ${expressionNumber} <br><br>
+                <strong>تفسیر عدد بیان:</strong><br>
+                ${meaning}
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('expression-form'));
+            fetch('/wp-content/uploads/data/save-expression-number.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22 && number !== 33) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function getExpressionMeaning(number) {
+            const meanings = {
+                1: "عدد ۱: شما فردی مستقل، جاه‌طلب و دارای روحیه رهبری هستید. دوست دارید مسیر خودتان را بسازید و از دیگران پیروی نکنید. افراد با عدد ۱ معمولا ایده‌پردازانی عالی هستند که ترجیح می‌دهند در رأس کارها باشند تا اینکه از دیگران دستور بگیرند. شما اعتمادبه‌نفس بالایی دارید، اما گاهی اوقات ممکن است به‌خاطر غرور زیاد، دیگران را نادیده بگیرید. موفقیت برای شما به معنای رسیدن به اهداف شخصی و تبدیل‌شدن به یک پیشگام در زمینه‌ای که انتخاب کرده‌اید، است. شما باید یاد بگیرید که همکاری را در کنار استقلال‌طلبی حفظ کنید تا بتوانید به تعادل برسید.",
+                2: "عدد ۲: شما فردی مهربان، صلح‌جو و اجتماعی هستید. انرژی شما به سمت ایجاد روابط و همکاری هدایت می‌شود. افراد با این عدد معمولاً دیپلمات‌های طبیعی هستند و می‌توانند اختلافات را حل کرده و بین افراد صلح برقرار کنند. شما احساساتی قوی دارید و معمولاً نیازمند امنیت عاطفی هستید. گرچه ممکن است گاهی احساس ضعف کنید، اما توانایی فوق‌العاده‌ای در همدلی و درک احساسات دیگران دارید. مهم‌ترین چالش شما این است که اعتمادبه‌نفس خود را تقویت کرده و بیش از حد به تأیید دیگران وابسته نباشید.",
+                3: "عدد ۳: شما شخصی خلاق، خوش‌بین و اجتماعی هستید. کلام نافذ و ارتباطات قوی از ویژگی‌های بارز شماست و بسیاری از افراد با عدد ۳ در زمینه‌های هنری، نویسندگی، بازیگری یا سخنرانی موفق هستند. شما به زیبایی و الهام علاقه دارید و همیشه به دنبال ابراز احساسات و عقاید خود به شیوه‌ای خلاقانه هستید. با این حال، ممکن است گاهی در سطح بمانید و نتوانید به عمق موضوعات بپردازید. مدیریت بهتر انرژی‌های خود و پرهیز از هدر دادن استعدادهایتان می‌تواند به شما کمک کند موفق‌تر باشید.",
+                4: "عدد ۴: شما فردی منظم، سخت‌کوش و پایبند به اصول هستید. موفقیت شما در پایداری و تلاش مستمر نهفته است. افراد با عدد ۴، پایه‌های یک سازمان یا جامعه را تشکیل می‌دهند و معمولاً قابل اعتمادترین و بااخلاق‌ترین افراد در یک گروه هستند. شما دیدگاهی منطقی به زندگی دارید و ترجیح می‌دهید همه‌چیز را بر اساس قوانین مشخصی پیش ببرید. با این حال، ممکن است بیش از حد سختگیر و مقاوم در برابر تغییر باشید. یادگیری انعطاف‌پذیری می‌تواند به شما کمک کند که فرصت‌های بیشتری را تجربه کنید.",
+                5: "عدد ۵: عاشق آزادی، ماجراجویی و تغییر هستید. یکنواختی برای شما کسالت‌آور است و همیشه به دنبال تجربیات جدیدید. افراد با این عدد معمولاً روحی سرکش دارند و دوست دارند جهان را کشف کنند. شما فردی پرانرژی و خوش‌صحبت هستید که به راحتی دیگران را جذب می‌کنید. اما ممکن است بی‌ثباتی و تصمیمات ناگهانی باعث شود که در مسیر زندگی دچار سردرگمی شوید. یافتن تعادل میان آزادی و مسئولیت‌پذیری برای شما کلید موفقیت است.",
+                6: "عدد ۶: فردی دلسوز، خانواده‌دوست و فداکار هستید. نیاز دیگران را در اولویت قرار می‌دهید و به دنبال ایجاد تعادل در زندگی هستید. شما ذاتاً یک مراقب و حمایت‌گر هستید و همیشه به فکر رفاه دیگرانید. احساس مسئولیت قوی شما باعث می‌شود که افراد به شما تکیه کنند. با این حال، ممکن است بیش از حد درگیر مشکلات دیگران شوید و فراموش کنید که از خودتان نیز مراقبت کنید. یادگیری مرزگذاری سالم می‌تواند به شما کمک کند تا از خستگی احساسی جلوگیری کنید.",
+                7: "عدد ۷: شما فردی متفکر، عمیق و جستجوگر هستید. به علوم، فلسفه و معنویت علاقه دارید و به دنبال کشف حقیقت هستید. شما معمولاً درون‌گرا هستید و از خلوت خود برای تفکر و مطالعه لذت می‌برید. افراد با این عدد تمایل دارند که فراتر از سطح ظاهر بروند و به دنبال معنا و دانش عمیق‌تری باشند. اما ممکن است گاهی اوقات از اجتماع دوری کنید یا بیش از حد در دنیای درونی خود غرق شوید. یادگیری برقراری ارتباط متعادل با دیگران می‌تواند به شما در پیشرفت شخصی کمک کند.",
+                8: "عدد ۸: دارای ذهنی قوی برای کسب موفقیت مالی و مدیریت هستید. قدرت، رهبری و دستیابی به اهداف برای شما مهم است. شما ذاتاً مدیری توانا و فردی عمل‌گرا هستید که می‌توانید در دنیای تجارت، سیاست یا سازمان‌های بزرگ موفق شوید. عدد ۸ نمایانگر ثروت و قدرت است، اما این قدرت باید با عدالت و مسئولیت‌پذیری همراه باشد. در غیر این صورت، ممکن است به فردی خودخواه تبدیل میکند.",
+                9: "عدد ۹: شما فردی خیرخواه، دلسوز و دارای بینش جهانی هستید. همیشه به دنبال کمک به دیگران و ایجاد تغییرات مثبت هستید. افراد با این عدد معمولاً در نقش‌های الهام‌بخش، بشردوستانه و راهنمایی موفق هستند. شما درکی عمیق از رنج دیگران دارید و همیشه به دنبال برقراری عدالت و ترویج عشق و مهربانی هستید. اما ممکن است گاهی احساس کنید که بار سنگینی از مسئولیت روی دوش شماست. یادگیری تعادل میان کمک به دیگران و رسیدگی به نیازهای خودتان می‌تواند مسیر زندگی شما را هموارتر کند.",
+                11: "عدد ۱۱: شما دارای شهود قوی و توانایی الهام‌بخشی به دیگران هستید. یک راهنمای معنوی محسوب می‌شوید. عدد ۱۱ یکی از اعداد اصلی است که به خرد، روشنگری و بینش بالا مرتبط است. شما ممکن است تجربیات خاصی داشته باشید که مسیر زندگی شما را به سمت معنویت و کشف رازهای عمیق هدایت کند. افرادی که این عدد را دارند، معمولاً تأثیر زیادی بر زندگی اطرافیان خود می‌گذارند. مدیریت درست احساسات و تمرکز بر توسعه فردی می‌تواند مسیر موفقیت شما را روشن‌تر کند.",
+                22: "عدد ۲۲: یک فرد باهوش و توانمند در ساختن چیزهای بزرگ هستید. توانایی ایجاد تغییرات عظیم را دارید. این عدد نشان‌دهنده رهبران، سازندگان و افراد با پتانسیل بی‌نهایت است. شما می‌توانید ایده‌های بزرگ را به واقعیت تبدیل کنید و اثری ماندگار در جهان به‌جا بگذارید. اما اگر از استعدادهای خود به‌درستی استفاده نکنید، ممکن است به سمت اضطراب و عدم تعادل کشیده شوید. تمرکز بر اهداف مثبت و استفاده از توانایی‌های خود به بهترین نحو، شما را به موفقیت می‌رساند.",
+                33: "عدد ۳۳: عددی فوق‌العاده معنوی است. شما یک راهنمای بزرگ، فداکار و دارای حس شفقت بالا هستید. عدد ۳۳ معمولاً نشان‌دهنده افرادی است که توانایی شفابخشی، آموزش و الهام‌بخشی به دیگران را دارند. این عدد بسیار نادر است و کسانی که آن را دارند، معمولاً تأثیر عمیقی بر جهان می‌گذارند. زندگی شما ممکن است پر از چالش‌های معنوی باشد، اما اگر راه درست را پیدا کنید، می‌توانید به یک الگوی بزرگ برای دیگران تبدیل شوید. تمرکز بر عشق، فداکاری و خدمت به دیگران می‌تواند مسیر شما را روشن کند."
+            };
+            return meanings[number] || "عدد نامشخص!";
+        }
+    </script>
+</body>
+</html>

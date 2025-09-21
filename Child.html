@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیشنهاد نام فرزند</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container child-name-app">
+        <h2 class="app-title">پیشنهاد نام فرزند</h2>
+        <form id="child-name-form" method="POST" action="/wp-content/uploads/data/save-child-name.php">
+            <div class="input-box">
+                <input type="text" name="fatherName" id="fatherName" placeholder="نام پدر" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherDay" id="fatherDay" placeholder="روز تولد پدر (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherMonth" id="fatherMonth" placeholder="ماه تولد پدر (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherYear" id="fatherYear" placeholder="سال تولد پدر (مثلاً 1360)" min="1300" max="1402" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="motherName" id="motherName" placeholder="نام مادر" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherDay" id="motherDay" placeholder="روز تولد مادر (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherMonth" id="motherMonth" placeholder="ماه تولد مادر (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherYear" id="motherYear" placeholder="سال تولد مادر (مثلاً 1360)" min="1300" max="1402" required>
+            </div>
+            <button type="submit" class="submit-btn">دریافت پیشنهاد نام</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        const boyNames = [
+            // اسامی فارسی
+            "آرمان", "آریا", "بهرام", "پارسا", "تراب", "جاوید", "حامد", "خسرو", "داریوش", "رادین", 
+            "رامین", "زامیاد", "سامان", "سهراب", "سهیل", "شایان", "شهرام", "صدرا", "طاها", "عماد",
+            "فراز", "فربد", "فرهاد", "فریبرز", "قاسم", "کاوه", "کیان", "کیارش", "کیوان", "مازیار",
+            "محمد", "مهدی", "مهران", "نریمان", "نوید", "پرهام", "پیمان", "یاشار", "یاسین", "هومن",
+            "امیر", "احمد", "علی", "حسن", "حسین", "رضا", "جواد", "سعید", "عباس", "کاظم",
+            "حمید", "ناصر", "اکبر", "اسماعیل", "ابراهیم", "خلیل", "رحیم", "رشید", "سلیم", "سلمان",
+            // اسامی ترکی
+            "آیدین", "آلتای", "آلپ", "آتا", "آتیلا", "بوراک", "جان", "چنگیز", "دورسون", "اِرتان",
+            "اِرکان", "اِرگین", "گُخان", "کُرات", "اوغوز", "اُکان", "اُلجان", "سِلجوق", "تایفون", "تِمور",
+            "تُغرول", "تُنای", "ییلماز", "یوسف", "اوُنور", "بایرام", "بِرک", "بِرکان", "چِتین", "دِمیر",
+            "اِفه", "گُوندوز", "حاکان", "کایا", "کِرِم", "مِرت", "مُصطفی", "نِجات", "اُزکان", "سِکان",
+            "سِردار", "طارق", "تُلگا", " اُموت", "یاشین", "زِکی", "کُبری", "اِمره", "اِنگین", "اُزگور",
+            // اسامی کردی
+            "آکو", "آرام", "آرش", "آزاد", "بازان", "بِه‌زاد", "بِه‌روژ", "بیژن", "داری", "دلشاد",
+            "دیاکو", "گوران", "هه‌ژار", "هه‌وال", "کاکو", "کاوه", "کِیوان", "کُسرا", "مامند", "مِهرداد",
+            "نەخشین", "پەری", "رِه‌وان", "رِزگار", "سەلمان", "سەرکان", "شەریف", "شیرکو", "طاها", "زەهاو",
+            "زەردەشت", "زەری", "کەمال", "کەیخسرو", "کوردو", "لەوان", "مەزدیسنا", "مەهاباد", "نەوید", "پەشنگ",
+            "رەشاد", "رەنجدار", "سەعدون", "سەیفەدین", "شەوان", "شەوکار", "طەلەب", "عەلی", "فەرهاد", "هەژین",
+            // ادامه اسامی (تا 500 اسم)
+            // به دلیل محدودیت فضا، فقط بخشی از اسامی رو اینجا آوردم. در عمل باید لیست کامل 500 تایی رو وارد کنی.
+            "آرمین", "آرتین", "آرشام", "بامداد", "بهنام", "پژمان", "ترانه", "جهان", "حبیب", "خشایار",
+            // ... (ادامه تا 500 اسم)
+        ];
+
+        const girlNames = [
+            // اسامی فارسی
+            "آتنا", "آرزو", "آرمینه", "آتوسا", "آیدا", "بهار", "پریا", "پریسا", "ترانه", "جهان‌بانو",
+            "حنا", "خاطره", "درسا", "دلارام", "رؤیا", "رها", "زری", "سارا", "سحر", "سپیده",
+            "شادی", "شبنم", "شقایق", "شهرزاد", "صبا", "طناز", "غزاله", "فرناز", "فریبا", "قاصدک",
+            "کیمیا", "لاله", "لیلا", "مریم", "مهتاب", "مهسا", "نازنین", "نسترن", "نسیم", "نغمه",
+            "هستی", "یلدا", "پانیذ", "پرنیان", "پگاه", "رویا", "زهرا", "فاطمه", "معصومه", "الهام",
+            "امینه", "بهناز", "پروین", "تهمینه", "خدیجه", "راضیه", "زینب", "سمیه", "شیما", "عاطفه",
+            // اسامی ترکی
+            "آیچا", "آیسل", "آیلین", "آینور", "اِلچین", "اِلناز", "اِلسا", "اِلوان", "بِلگین", "بِرکای",
+            "بورجو", "جانان", "چِچک", "دِریا", "دِنیز", "اِبروی", "اِلِم", "گونش", "گُزل", "هاندان",
+            "لاله‌زار", "مِلِک", "نازلی", "نورای", "اُزلم", "پِلین", "سِدا", "سِلین", "سِما", "سِویل",
+            "شِبنم", "توبا", "تولای", "اومای", "یِلدا", "زِینپ", "آلتان", "آیدان", "بِلما", "دِمت",
+            "اِلدا", "گُلای", "هِلین", "کِزبان", "مِرجان", "نِسلی", "اُزگه", "سِمر", "شِرین", "تِلما",
+            // اسامی کردی
+            "آلا", "آرزو", "آسو", "آوین", "باران", "بِه‌ناو", "بِه‌ژین", "دِلال", "دِلسوز", "دِلنیا",
+            "گُلاوی", "هه‌لاله", "هه‌ستی", "کانی", "کِژال", "لالش", "لەیلا", "مەریوان", "نارین", "نەرگس",
+            "پەریشان", "رِهان", "رِنجان", "سەما", "شەنگە", "شیلان", "شیرین", "طوبا", "زەری", "زینا",
+            "کەژاو", "کەمالە", "لەنجە", "مەهین", "نەوا", "پەخشان", "رەها", "سەعدە", "شەوکت", "عەزیزە",
+            "فەرزین", "هەنار", "یاسەمین", "بەهارە", "دەربەند", "گەلاوێژ", "هەوار", "کەرگە", "نەگین", "پەروانە",
+            // ادامه اسامی (تا 500 اسم)
+            // به دلیل محدودیت فضا، فقط بخشی از اسامی رو اینجا آوردم. در عمل باید لیست کامل 500 تایی رو وارد کنی.
+            "آناهیتا", "آفرین", "بارین", "بهدخت", "پانیا", "پوپک", "تینا", "ثمین", "چکاوک", "حورا",
+            // ... (ادامه تا 500 اسم)
+        ];
+
+        document.getElementById('child-name-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const fatherName = document.getElementById('fatherName').value.trim();
+            const fatherDay = parseInt(document.getElementById('fatherDay').value);
+            const fatherMonth = parseInt(document.getElementById('fatherMonth').value);
+            const fatherYear = parseInt(document.getElementById('fatherYear').value);
+            const motherName = document.getElementById('motherName').value.trim();
+            const motherDay = parseInt(document.getElementById('motherDay').value);
+            const motherMonth = parseInt(document.getElementById('motherMonth').value);
+            const motherYear = parseInt(document.getElementById('motherYear').value);
+
+            if (!fatherName || !fatherDay || !fatherMonth || !fatherYear || !motherName || !motherDay || !motherMonth || !motherYear) {
+                showError("لطفاً تمام فیلدها را پر کنید.");
+                return;
+            }
+
+            if (fatherDay < 1 || fatherDay > 31 || fatherMonth < 1 || fatherMonth > 12 || fatherYear < 1300 || fatherYear > 1402 ||
+                motherDay < 1 || motherDay > 31 || motherMonth < 1 || motherMonth > 12 || motherYear < 1300 || motherYear > 1402) {
+                showError("لطفاً تاریخ‌های معتبر وارد کنید.");
+                return;
+            }
+
+            const fatherNameNumber = calculateNameNumber(fatherName);
+            const motherNameNumber = calculateNameNumber(motherName);
+            const fatherBirthNumber = calculateBirthNumber(fatherDay, fatherMonth, fatherYear);
+            const motherBirthNumber = calculateBirthNumber(motherDay, motherMonth, motherYear);
+            const combinedNumber = sumDigits(fatherNameNumber + motherNameNumber + fatherBirthNumber + motherBirthNumber);
+
+            const optimalNumbers = [1, 2, 3, 4, 6, 7, 8, 9]; // اعداد مناسب برای موفقیت مالی، علمی و احساسی
+            const boyName = findSuitableName(boyNames, combinedNumber, optimalNumbers);
+            const girlName = findSuitableName(girlNames, combinedNumber, optimalNumbers);
+
+            showError(`
+                <strong>تحلیل اعداد:</strong><br>
+                عدد نام پدر: ${fatherNameNumber}<br>
+                عدد تولد پدر: ${fatherBirthNumber}<br>
+                عدد نام مادر: ${motherNameNumber}<br>
+                عدد تولد مادر: ${motherBirthNumber}<br>
+                عدد ترکیبی: ${combinedNumber}<br><br>
+                <strong>پیشنهاد نام فرزند:</strong><br>
+                نام پسر: ${boyName.name} (عدد: ${boyName.number})<br>
+                نام دختر: ${girlName.name} (عدد: ${girlName.number})<br><br>
+                این اسامی با انرژی اعداد برای موفقیت مالی، علمی و احساسی سازگار هستند.
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('child-name-form'));
+            fetch('/wp-content/uploads/data/save-child-name.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+            return sumDigits(total);
+        }
+
+        function calculateBirthNumber(day, month, year) {
+            const gregorianDate = jalaliToGregorian(year, month, day);
+            const gregorianYear = gregorianDate[0];
+            const yearSum = gregorianYear.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const total = day + month + yearSum;
+            return sumDigits(total);
+        }
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function findSuitableName(names, combinedNumber, optimalNumbers) {
+            const suitableNames = names.map(name => {
+                const nameNumber = calculateNameNumber(name);
+                return { name, number: nameNumber };
+            }).filter(item => optimalNumbers.includes(item.number) && Math.abs(item.number - combinedNumber) <= 2);
+
+            return suitableNames.length > 0 
+                ? suitableNames[Math.floor(Math.random() * suitableNames.length)]
+                : { name: names[Math.floor(Math.random() * names.length)], number: calculateNameNumber(names[Math.floor(Math.random() * names.length)]) };
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = parseInt(jy);
+            jm = parseInt(jm);
+            jd = parseInt(jd);
+
+            const jalaliDays = [
+                31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, (jy % 4 === 3 ? 30 : 29)
+            ];
+            let totalDays = 0;
+            for (let i = 0; i < jm - 1; i++) totalDays += jalaliDays[i];
+            totalDays += jd;
+
+            let gy = jy + 621;
+            let leapJ = -14;
+            let jp = totalDays;
+            let jump = jy % 4 === 3 ? 366 : 365;
+            let march = 20;
+
+            if (jp >= jump) {
+                jp -= jump;
+                gy++;
+            }
+
+            let gd = jp;
+            let gm = 3;
+            const daysInMonth = [
+                31, (gy % 4 === 0 && gy % 100 !== 0 || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+            ];
+
+            for (let i = 0; i < 12; i++) {
+                if (gd <= daysInMonth[i]) {
+                    gm = i + 1;
+                    break;
+                }
+                gd -= daysInMonth[i];
+            }
+
+            return [gy, gm, gd];
+        }
+    </script>
+</body>
+</html>

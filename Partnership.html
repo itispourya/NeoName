@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fa" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحلیل رابطه بر اساس نام و جنسیت</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container relationship-analysis-app">
+        <h2 class="app-title">تحلیل رابطه بر اساس نام و جنسیت</h2>
+        <form id="relationship-analysis-form" method="POST" action="/wp-content/uploads/data/save-relationship-analysis.php">
+            <div class="input-box">
+                <input type="text" name="person1Name" id="person1Name" placeholder="نام فرد اول" required>
+            </div>
+            <div class="input-box">
+                <select name="person1Gender" id="person1Gender" required>
+                    <option value="male">مرد</option>
+                    <option value="female">زن</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <input type="text" name="person2Name" id="person2Name" placeholder="نام فرد دوم" required>
+            </div>
+            <div class="input-box">
+                <select name="person2Gender" id="person2Gender" required>
+                    <option value="female">زن</option>
+                    <option value="male">مرد</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">تحلیل</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        const relationshipAnalysis = {
+            1: {
+                future: "پیش‌بینی آینده‌ای درخشان برای این رابطه با تمرکز بر رهبری، نوآوری و ابتکارات جدید. مسیر پیش رو می‌تواند شامل پروژه‌های بزرگ و موفقیت‌های چشمگیر باشد، اما نیاز به مدیریت صحیح استقلال با همکاری دارد.",
+                economic: "شرایط اقتصادی ممکن است به دلیل ابتکارات جدید و پروژه‌های نوآورانه بهبود یابد. این زوج می‌توانند پتانسیل بالایی برای سرمایه‌گذاری‌های موفق داشته باشند، اما باید مراقب خطرات مرتبط با تصمیمات مستقل باشند.",
+                advice: "تمرکز بر همکاری و سرمایه‌گذاری مشترک می‌تواند به رشد اقتصادی منجر شود. ایجاد تعادل بین استقلال و همکاری بسیار حیاتی است. پیشنهاد می‌شود برای تصمیمات مهم با هم مشورت کنید و از توانایی‌های متقابل استفاده کنید."
+            },
+            2: {
+                future: "آینده‌ای با تأکید بر همکاری، تعادل و ارتباطات دوستانه پیش‌بینی می‌شود. این رابطه پتانسیل بالایی برای ایجاد یک زندگی هماهنگ و با ثبات دارد، اما نیاز به پرورش ارتباطات صمیمانه و صادقانه خواهد داشت.",
+                economic: "ثبات اقتصادی از طریق مدیریت مشترک و هوشمندانه امور مالی ممکن است حاصل شود. سرمایه‌گذاری‌های با دقت انجام شده می‌تواند به پایداری مالی کمک کند. احتمالاً این زوج در برنامه‌ریزی بلندمدت مالی موفق خواهند بود.",
+                advice: "ایجاد برنامه‌های مالی مشترک و صبور بودن در برابر تغییرات می‌تواند به بهبود شرایط اقتصادی منجر شود. توصیه می‌شود به طور منظم درباره اهداف مالی گفتگو کنید و از همدیگر حمایت عاطفی و عملی داشته باشید."
+            },
+            3: {
+                future: "پیش‌بینی آینده‌ای پر از شادی، خلاقیت و بیان هنری در این رابطه وجود دارد. زندگی‌ای که ممکن است با تنوع و تجربه‌های هنری همراه باشد، اما نیاز به تمرکز و تعهد برای تبدیل ایده‌ها به واقعیت دارد.",
+                economic: "پتانسیل برای درآمد از طریق هنر، ارتباطات و پروژه‌های خلاقانه وجود دارد. این زوج می‌توانند از مهارت‌های هنری و اجتماعی خود برای بهبود شرایط اقتصادی استفاده کنند، اما باید مراقب باشند که تمرکز خود را حفظ کنند.",
+                advice: "استفاده از خلاقیت برای ایجاد کسب‌وکارهای جدید یا بهبود وضعیت موجود پیشنهاد می‌شود. یادگیری مدیریت زمان و تمرکز بر پروژه‌های بلندمدت می‌تواند به موفقیت اقتصادی منجر شود."
+            },
+            4: {
+                future: "آینده‌ای با ساختار، پایداری و استقامت پیش‌بینی می‌شود. این رابطه می‌تواند بر مبنای اصول و ساختارهای محکم شکل بگیرد که به ثبات و امنیت منجر شود، اما نیازمند انعطاف‌پذیری در برابر تغییرات کوچک است.",
+                economic: "ثبات اقتصادی از طریق کار سخت، سازماندهی و برنامه‌ریزی دقیق مالی قابل دستیابی است. این زوج می‌توانند با تمرکز بر جزئیات، پس‌انداز و سرمایه‌گذاری‌های هوشمندانه به امنیت اقتصادی دست یابند.",
+                advice: "برنامه‌ریزی مالی دقیق و توجه به جزئیات برای بهبود شرایط اقتصادی ضروری است. پیشنهاد می‌شود که یک برنامه مالی مشترک ایجاد کنید و به طور منظم آن را بازبینی کنید."
+            },
+            5: {
+                future: "پیش‌بینی تغییرات، ماجراجویی‌ها و تجربه‌های جدید در آینده این رابطه وجود دارد. این زوج می‌توانند زندگی‌ای پر از هیجان و کشف داشته باشند، اما باید به تعادل بین آزادی و تعهد توجه کنند.",
+                economic: "فرصت‌های اقتصادی از طریق تغییرات شغلی، سفرها و تجارت‌های جدید ممکن است پیش بیاید. این رابطه پتانسیل بالایی برای درآمدزایی از طریق تنوع دارد، اما باید مراقب بی‌ثباتی مالی باشند.",
+                advice: "تنوع در منابع درآمد و آمادگی برای تغییرات شغلی می‌تواند به بهبود شرایط اقتصادی منجر شود. توصیه می‌شود به سرمایه‌گذاری‌های کوچک و متنوع فکر کنید و همیشه یک برنامه پشتیبان مالی داشته باشید."
+            },
+            6: {
+                future: "آینده‌ای با رویکرد خانوادگی، مسئولیت‌پذیری و مراقبت پیش‌بینی می‌شود. این رابطه می‌تواند به پایه‌گذاری یک خانواده محکم و حمایتی منجر شود، اما نیاز به توازن بین توجه به دیگران و خود مراقبتی دارد.",
+                economic: "سرمایه‌گذاری در خانه، خانواده و کسب‌وکارهای خانگی می‌تواند به امنیت اقتصادی منجر شود. این زوج ممکن است از طریق خدمات مرتبط با خانواده یا آموزش به درآمد خوبی دست یابند.",
+                advice: "تمرکز بر کسب‌وکارهای خانگی یا خدمات مرتبط با خانواده پیشنهاد می‌شود. همچنین، توجه به نیازهای خود در کنار دیگران حائز اهمیت است."
+            },
+            7: {
+                future: "پیش‌بینی آینده‌ای با دانش، تحلیل و درون‌نگری در این رابطه وجود دارد. این زوج می‌توانند از طریق مطالعه و تحقیق به موفقیت‌های بزرگ دست یابند، اما باید به تعادل بین زندگی درونی و اجتماعی توجه کنند.",
+                economic: "درآمد از طریق مشاوره، تحقیقات و فعالیت‌های آکادمیک ممکن است. این زوج می‌توانند از دانش و تحلیل خود برای بهبود شرایط اقتصادی استفاده کنند، اما باید مراقب باشند که در جزئیات غرق نشوند.",
+                advice: "سرمایه‌گذاری در آموزش و یادگیری مهارت‌های جدید برای بهبود شرایط اقتصادی توصیه می‌شود. همچنین، به اشتراک گذاشتن دانش با دیگران و استفاده از ایده‌های جدید در کسب‌وکار می‌تواند به موفقیت بینجامد."
+            },
+            8: {
+                future: "آینده‌ای با تمرکز بر موفقیت، مالیه و قدرت پیش‌بینی می‌شود. این رابطه می‌تواند به رشد اقتصادی بزرگ و موفقیت‌های مالی منجر شود، اما نیاز به مدیریت قدرت و مسئولیت دارد.",
+                economic: "پتانسیل برای رشد اقتصادی بزرگ از طریق سرمایه‌گذاری‌های هوشمندانه و مدیریت منابع وجود دارد. این زوج می‌توانند با برنامه‌ریزی دقیق و اجرای استراتژی‌های مالی به ثروت برسند.",
+                advice: "مدیریت مالی دقیق و سرمایه‌گذاری در حوزه‌هایی با پتانسیل رشد بالا توصیه می‌شود. همچنین، توجه به همکاری و احترام به استقلال یکدیگر در تصمیمات مالی حیاتی است."
+            },
+            9: {
+                future: "پیش‌بینی آینده‌ای با تأکید بر همدلی، بخشش و خدمت به دیگران در این رابطه وجود دارد. این زوج می‌توانند از طریق کارهای خیریه و اجتماعی به موفقیت دست یابند، اما باید به حفظ تعادل بین خود و دیگران توجه کنند.",
+                economic: "درآمد از طریق کارهای خیریه یا ارائه خدمات اجتماعی ممکن است. این رابطه پتانسیل بالایی برای بهبود شرایط اقتصادی از طریق کمک به جامعه دارد، اما باید مراقب باشند که از خود غفلت نکنند.",
+                advice: "کار برای بهبود جامعه می‌تواند به بهبود شرایط اقتصادی منجر شود. پیشنهاد می‌شود به نیازهای شخصی و مرزبندی برای حفظ سلامت روحی توجه کنید."
+            }
+        };
+
+        document.getElementById('relationship-analysis-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const person1Name = document.getElementById('person1Name').value.trim();
+            const person2Name = document.getElementById('person2Name').value.trim();
+            const person1Gender = document.getElementById('person1Gender').value;
+            const person2Gender = document.getElementById('person2Gender').value;
+
+            if (!person1Name || !person2Name) {
+                showError("لطفاً نام هر دو نفر را وارد کنید.");
+                return;
+            }
+
+            const person1NameNumber = calculateNameNumber(person1Name);
+            const person2NameNumber = calculateNameNumber(person2Name);
+            
+            const combinedNumber = sumDigits(person1NameNumber + person2NameNumber);
+            
+            showError(`
+                <strong>تحلیل رابطه:</strong><br>
+                <strong>عدد ترکیبی رابطه:</strong> ${combinedNumber}<br>
+                <em>پیش‌بینی آینده:</em><br>
+                ${relationshipAnalysis[combinedNumber].future}<br><br>
+                <em>شرایط اقتصادی:</em><br>
+                ${relationshipAnalysis[combinedNumber].economic}<br><br>
+                <em>پیشنهادات برای بهبود شرایط زندگی:</em><br>
+                ${relationshipAnalysis[combinedNumber].advice}<br><br>
+                <em>نکات کلیدی برای رابطه:</em><br>
+                - توجه به همکاری و همدلی در رابطه برای رسیدن به اهداف مشترک بسیار مهم است. همکاری نه تنها به موفقیت مالی کمک می‌کند بلکه به عمیق‌تر شدن روابط نیز می‌انجامد.<br>
+                - تقویت ارتباطات برای حل مسائل مالی و زندگی روزمره ضروری است. گفتگوی منظم و صادقانه می‌تواند به پیشگیری از سوء تفاهم‌ها و تنش‌ها کمک کند.<br>
+                - برنامه‌ریزی مشترک برای آینده با توجه به نیازهای هر دو نفر می‌تواند به ایجاد یک زندگی پایدار و رضایت‌بخش کمک کند. اهداف کوتاه‌مدت و بلندمدت را مشخص کنید و برای رسیدن به آن‌ها با هم تلاش کنید.<br>
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('relationship-analysis-form'));
+            fetch('/wp-content/uploads/data/save-relationship-analysis.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+            return sumDigits(total);
+        }
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            if (errorWindow && errorMessage) {
+                errorMessage.innerHTML = message;
+                errorWindow.style.display = 'block';
+            } else {
+                console.error("Element 'error-window' or 'error-message' not found");
+            }
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            if (errorWindow) {
+                errorWindow.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

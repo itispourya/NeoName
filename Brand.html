@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیشنهاد نام برند</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container brand-name-app">
+        <h2 class="app-title">پیشنهاد نام برند و بیزنس</h2>
+        <form id="brand-name-form" method="POST" action="/wp-content/uploads/data/save-brand-name.php">
+            <div class="input-box">
+                <input type="text" name="firstName" id="firstName" placeholder="نام" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="lastName" id="lastName" placeholder="نام خانوادگی" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="day" id="day" placeholder="روز (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="month" id="month" placeholder="ماه (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="year" id="year" placeholder="سال (مثلاً 1360)" min="1300" max="1402" required>
+            </div>
+            <div class="input-box">
+                <select name="businessField" id="businessField" onchange="toggleCustomField()" required>
+                    <option value="">دسته بندی</option>
+                    <option value="technology">فناوری</option>
+                    <option value="fashion">مد و پوشاک</option>
+                    <option value="food">مواد غذایی</option>
+                    <option value="services">خدمات</option>
+                    <option value="general">عمومی</option>
+                    <option value="other">دیگر موارد</option>
+                </select>
+            </div>
+            <div class="input-box" id="customFieldContainer" style="display: none;">
+                <input type="text" name="customField" id="customField" placeholder="دسته‌بندی شغلی خود را وارد کنید">
+            </div>
+            <div class="input-box">
+                <input type="text" name="jobTitle" id="jobTitle" placeholder="عنوان شغل" required>
+            </div>
+            <button type="submit" class="submit-btn">دریافت نام برند</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        const brandNames = {
+            technology: [
+                "نورکس", "کیالین", "رادوکس", "آریونت", "سپهریوم", "فرازیل", "نوویتکس", "پارسوم", "شایونت", "مهرینکس",
+                "بهراکس", "دریونت", "کوریل", "سیومکس", "رستیل", "شهریوم", "نریونت", "پرهال", "هومکس", "امیلین",
+                "پیمانکس", "خشایل", "سامونت", "فریدیل", "کامرون", "رادینکس", "یاشیل", "پژونت", "سهیلوم", "فرشال",
+                "کیونت", "نادریل", "هادوم", "ساسیل", "اردیل", "بابونت", "بهزال", "ترابیل", "جاویدیل", "حامیل",
+                "خسرونت", "دانیل", "رامیل", "زامیکس", "سروشیل", "شروینت", "طاهرون", "عمادیل", "فریبیل", "قاسمیل",
+                "نورمکس", "کیالو", "رادینو", "آریوس", "سپهرکس", "فرازنت", "نویدکس", "پارسینکس", "شایانکس", "مهرکس",
+                "نورسل", "کیانکس", "رادونت", "آریوتک", "سپهرنت", "فرازتک", "نویدنت", "پارسنت", "شایانتکس", "مهرتکس",
+                "دریونتکس", "کوریلکس", "سیومکسین", "رستیلکس", "شهریومکس", "نریونتکس", "پرهالکس", "هومکسین", "امیلینکس",
+                "نورویکس", "کیالینکس", "رادوکسین", "آریونتکس", "سپهریومکس", "فرازیلکس", "نوویتکسین", "پارسومکس", "شایونتکس", "مهرینکسین",
+                "نورکسیل", "کیالینت", "رادوکست", "آریونتکسین", "سپهریومکسین", "فرازیلکسین", "نوویتکسینت", "پارسومکسین", "شایونتکسین", "مهرینکسینت",
+                "نورکسینت", "کیالینتکس", "رادوکسینت", "آریونتکسینت", "سپهریومکسینت", "فرازیلکسینت", "نوویتکسینتکس", "پارسومکسینت", "شایونتکسینت", "مهرینکسینتکس",
+                "نورکسل", "کیالینکس", "رادوکسنت", "آریونتکسنت", "سپهریومکسنت", "فرازیلکسنت", "نوویتکسینتکس", "پارسومکسینتکس", "شایونتکسینتکس", "مهرینکسینتکسین"
+            ],
+            fashion: [
+                "پوشیل", "رنگال", "زیبونت", "مدیلکس", "نازیل", "فرینوشیل", "شادیل", "پریچال", "گلبارین", "هورینت",
+                "آذرنگیل", "بانوشیل", "دریاگلیل", "رزینیل", "شیدفرین", "فرینوشیل", "گلینیل", "همیشگتکس", "آتوسال", "پریچهرین",
+                "راحلیل", "سمیرال", "فریسال", "گهرشیدیل", "هورنازینیل", "آرنیسال", "دریازادین", "رزوانیل", "شکیلازیل", "فرینازینیل",
+                "زیباشیدیل", "رنگارین", "مدیلکسین", "نازیلین", "فرینال", "شادیلکس", "پریچینیل", "گلبارینیل", "هورینکسین", "آذرنگینیل",
+                "پوشیلکس", "رنگالکس", "زیبونتکس", "مدیلکسین", "نازیلکس", "فرینوشیلکس", "شادیلکسین", "پریچالکس", "گلبارینکس", "هورینتکسین",
+                "پوشیلکسین", "رنگالکسین", "زیبونتکسین", "مدیلکسینت", "نازیلکسین", "فرینوشیلکسین", "شادیلکسینت", "پریچالکسین", "گلبارینکسین", "هورینتکسینت",
+                "پوشیلکسینت", "رنگالکسینت", "زیبونتکسینت", "مدیلکسینتکس", "نازیلکسینت", "فرینوشیلکسینت", "شادیلکسینتکس", "پریچالکسینت", "گلبارینکسینت", "هورینتکسینتکس"
+            ],
+            food: [
+                "خوریل", "طعمینیل", "نوشینیل", "غذانکسین", "مزه‌دال", "نعمتینیل", "شیرینیل", "تازینیل", "خوشمزه‌دال", "پختینیل",
+                "آشینیل", "نونینیل", "دسرینیل", "خوراکینیل", "نوشاکسین", "میوه‌دال", "طعمینکسین", "غذینیل", "مزه‌بارین", "نعمتکسین",
+                "شیرینکسین", "تازینیل", "خوشمکسین", "پختینکسین", "آشینکسین", "نونینکسین", "دسریکسین", "خوراکینکسین", "نوشاکینیل", "میوه‌بارین",
+                "خوریلکس", "طعمینیلکس", "نوشینیلکس", "غذانکسینت", "مزه‌دالکس", "نعمتینیلکس", "شیرینیلکس", "تازینیلکس", "خوشمزه‌دالکس", "پختینیلکس",
+                "خوریلکسین", "طعمینیلکسین", "نوشینیلکسین", "غذانکسینتکس", "مزه‌دالکسین", "نعمتینیلکسین", "شیرینیلکسین", "تازینیلکسین", "خوشمزه‌دالکسین", "پختینیلکسین"
+            ],
+            services: [
+                "کارینیل", "خدمتینیل", "یارینیل", "همراهینیل", "پشتیبانیل", "راهینیل", "مشاورینیل", "حامیکسین", "رفاهینیل", "امدادینیل",
+                "کارینکسین", "خدمتینکسین", "یارینکسین", "همراهینکسین", "پشتیبانکسین", "راهینکسین", "مشاورینکسین", "حامیینکس", "رفاهینکسین", "امدادینکسین",
+                "کارینوتکس", "خدمتینوتکس", "یارینینتکس", "همراهینینتکس", "پشتیبانینتکس", "راهینینتکس", "مشاورینینتکس", "حامیینتکس", "رفاهینینتکس", "امدادینینتکس",
+                "کارینوتکسین", "خدمتینوتکسین", "یارینینتکسین", "همراهینینتکسین", "پشتیبانینتکسین", "راهینینتکسین", "مشاورینینتکسین", "حامیینتکسین", "رفاهینینتکسین", "امدادینینتکسین"
+            ],
+            general: [
+                "نورکسین", "رادینیل", "آریونتکس", "سپهرکسین", "فرازینیل", "نویدکسین", "پارسینیل", "شایانکسین", "مهرکسین", "بهرامکسین",
+                "دریاسلین", "کورینیل", "سیوانتکس", "رستکین", "شهریکسین", "نریمانتکس", "پرهامکسین", "هومنتکس", "امیرتکسین", "پیمانکسین",
+                "خشایارتکس", "سامانتکس", "فریدکستکس", "کامرنتکس", "رادینتکس", "یاشینتکس", "پژمانتکس", "سهیلکستکس", "فرشادتکس", "کیوانتکس",
+                "نورکسینت", "رادینیلت", "آریونتکسین", "سپهرکسینت", "فرازینیلت", "نویدکسینت", "پارسینیلت", "شایانکسینت", "مهرکسینت", "بهرامکسینت"
+            ]
+        };
+
+        document.getElementById('brand-name-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const day = parseInt(document.getElementById('day').value);
+            const month = parseInt(document.getElementById('month').value);
+            const year = parseInt(document.getElementById('year').value);
+            let businessField = document.getElementById('businessField').value;
+            const customField = document.getElementById('customField').value.trim();
+            const jobTitle = document.getElementById('jobTitle').value.trim();
+
+            if (!firstName || !lastName || !day || !month || !year || !businessField || !jobTitle || (businessField === 'other' && !customField)) {
+                showError("لطفاً تمام فیلدها را پر کنید.");
+                return;
+            }
+
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1300 || year > 1402) {
+                showError("لطفاً تاریخ معتبر وارد کنید.");
+                return;
+            }
+
+            if (businessField === 'other') {
+                businessField = customField;
+            }
+
+            const nameNumber = calculateNameNumber(firstName + lastName);
+            const birthNumber = calculateBirthNumber(day, month, year);
+            const combinedNumber = sumDigits(nameNumber + birthNumber);
+            const suggestedBrand = findSuitableBrandName(combinedNumber, businessField, jobTitle, firstName, nameNumber, birthNumber);
+
+            showError(`
+                <strong>تحلیل اعداد:</strong><br>
+                عدد نام شما: ${nameNumber}<br>
+                عدد تولد: ${birthNumber}<br>
+                عدد ترکیبی: ${combinedNumber}<br><br>
+                <strong>پیشنهاد نام برند:</strong><br>
+                ${suggestedBrand}<br><br>
+                این نام با زمینه کاری (${businessField}) و عنوان شغلی (${jobTitle}) شما سازگار است.
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('brand-name-form'));
+            fetch('/wp-content/uploads/data/save-brand-name.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+            return sumDigits(total);
+        }
+
+        function calculateBirthNumber(day, month, year) {
+            const gregorianDate = jalaliToGregorian(year, month, day);
+            const gregorianYear = gregorianDate[0];
+            const yearSum = gregorianYear.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const total = day + month + yearSum;
+            return sumDigits(total);
+        }
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function findSuitableBrandName(combinedNumber, businessField, jobTitle, firstName, nameNumber, birthNumber) {
+            const fieldKeywords = businessField.toLowerCase().split(' ');
+            const titleKeywords = jobTitle.toLowerCase().split(' ');
+            let category = 'general';
+
+            if (brandNames[businessField]) {
+                category = businessField;
+            } else {
+                Object.keys(brandNames).forEach(key => {
+                    if (fieldKeywords.some(keyword => key.includes(keyword))) {
+                        category = key;
+                    }
+                });
+            }
+
+            const names = brandNames[category];
+            const suitableNames = names.filter(name => {
+                const nameNumber = calculateNameNumber(name);
+                const isNumberCompatible = Math.abs(nameNumber - combinedNumber) <= 2;
+                const isNameCompatible = Math.abs(nameNumber - nameNumber) <= 2;
+                const isBirthCompatible = Math.abs(nameNumber - birthNumber) <= 2;
+                const isFieldRelated = fieldKeywords.some(keyword => name.toLowerCase().includes(keyword));
+                const isTitleRelated = titleKeywords.some(keyword => name.toLowerCase().includes(keyword));
+                return isNumberCompatible && isNameCompatible && isBirthCompatible && (isFieldRelated || isTitleRelated);
+            });
+
+            if (suitableNames.length === 0) {
+                return names[Math.floor(Math.random() * names.length)];
+            }
+
+            return suitableNames[0];
+        }
+
+        function toggleCustomField() {
+            const businessField = document.getElementById('businessField').value;
+            const customFieldContainer = document.getElementById('customFieldContainer');
+            const customField = document.getElementById('customField');
+            customFieldContainer.style.display = businessField === 'other' ? 'block' : 'none';
+            customField.required = businessField === 'other';
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = parseInt(jy);
+            jm = parseInt(jm);
+            jd = parseInt(jd);
+
+            const jalaliDays = [
+                31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, (jy % 4 === 3 ? 30 : 29)
+            ];
+            let totalDays = 0;
+            for (let i = 0; i < jm - 1; i++) totalDays += jalaliDays[i];
+            totalDays += jd;
+
+            let gy = jy + 621;
+            let leapJ = -14;
+            let jp = totalDays;
+            let jump = jy % 4 === 3 ? 366 : 365;
+            let march = 20;
+
+            if (jp >= jump) {
+                jp -= jump;
+                gy++;
+            }
+
+            let gd = jp;
+            let gm = 3;
+            const daysInMonth = [
+                31, (gy % 4 === 0 && gy % 100 !== 0 || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+            ];
+
+            for (let i = 0; i < 12; i++) {
+                if (gd <= daysInMonth[i]) {
+                    gm = i + 1;
+                    break;
+                }
+                gd -= daysInMonth[i];
+            }
+
+            return [gy, gm, gd];
+        }
+    </script>
+</body>
+</html>

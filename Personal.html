@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فرم اطلاعات شخصی</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <form method="POST" action="/wp-content/uploads/data/save-form-data.php" class="uniform-app-container" onsubmit="submitForm()">
+        <h2 class="app-title">فرم اطلاعات شخصی</h2>
+        <div class="input-box">
+            <input type="text" id="firstName" name="firstName" placeholder="نام" required>
+        </div>
+        <div class="input-box">
+            <input type="text" id="lastName" name="lastName" placeholder="نام خانوادگی" required>
+        </div>
+        <div class="input-box">
+            <input type="number" id="day" name="day" placeholder="روز تولد (۱-۳۱)" min="1" max="31" required>
+        </div>
+        <div class="input-box">
+            <input type="number" id="month" name="month" placeholder="ماه تولد (۱-۱۲)" min="1" max="12" required>
+        </div>
+        <div class="input-box">
+            <input type="number" id="year" name="year" placeholder="سال تولد (مثلا 1360)" min="1300" max="1404" required>
+        </div>
+        <div class="input-box">
+            <input type="text" id="motherName" name="motherName" placeholder="نام مادر" required>
+        </div>
+        <div class="input-box">
+            <input type="text" id="jobTitle" name="jobTitle" placeholder="عنوان شغلی" required>
+        </div>
+        <div class="input-box">
+            <input type="text" id="brandName" name="brandName" placeholder="نام برند یا شرکت" required>
+        </div>
+        <div class="input-box">
+            <input type="text" id="spouseName" name="spouseName" placeholder="نام همسر">
+        </div>
+        <div class="input-box">
+            <input type="number" id="spouseDay" name="spouseDay" placeholder="روز تولد همسر (۱-۳۱)" min="1" max="31">
+        </div>
+        <div class="input-box">
+            <input type="number" id="spouseMonth" name="spouseMonth" placeholder="ماه تولد همسر (۱-۱۲)" min="1" max="12">
+        </div>
+        <div class="input-box">
+            <input type="number" id="spouseYear" name="spouseYear" placeholder="سال تولد همسر (مثلاً ۱۳۷۰)" min="1300" max="1404">
+        </div>
+        <div class="input-box">
+            <input type="text" id="spouseJobTitle" name="spouseJobTitle" placeholder="عنوان شغلی همسر">
+        </div>
+        <div class="input-box">
+            <input type="text" id="telegramNumber" name="telegramNumber" placeholder="شماره تماس متصل به تلگرام" required>
+        </div>
+        <div class="input-box">
+            <input type="email" id="email" name="email" placeholder="آدرس ایمیل" required>
+        </div>
+        <button type="submit" class="submit-btn">ثبت اطلاعات</button>
+    </form>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        function submitForm() {
+            console.log("فرم ارسال شد. به زودی از طریق تلگرام با شما تماس بر قرار خواهیم کرد.");
+            // می‌تونی اینجا منطق اضافه‌تری بذاری، مثلاً نمایش پیام موفقیت
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

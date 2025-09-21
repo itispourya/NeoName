@@ -1,0 +1,936 @@
+Below is the complete, integrated code for the "Ultimate Numerology & Astrology Analyzer" in a single, cohesive file. This version includes HTML, CSS, and JavaScript, with lengthy, detailed, and comprehensive output descriptions for each section, written in proper English. This is the final, non-upgradeable version as per your request.
+html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Numerology & Astrology Analyzer</title>
+    <style>
+        body {
+            background-color: #000000;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 15px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .numerology-app-container {
+            width: 100%;
+            max-width: 650px;
+            padding: 20px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.18);
+            margin: 0 auto;
+            direction: ltr;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px rgba(173, 255, 0, 0.7);
+        }
+        .input-box {
+            margin: 15px auto;
+            width: 90%;
+            position: relative;
+        }
+        .numerology-app-container input,
+        .numerology-app-container select {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            background-color: rgba(248, 255, 232, 0.78);
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            outline: none;
+        }
+        .numerology-app-container input:hover,
+        .numerology-app-container select:hover {
+            background-color: #F8FFE8;
+            box-shadow: 0 0 8px rgba(173, 255, 0, 0.5);
+        }
+        .numerology-app-container input::placeholder {
+            color: #555555;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .numerology-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            width: 85%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 25px auto;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(173, 255, 0, 0.4);
+        }
+        .submit-btn:hover {
+            background-color: #BFFF00;
+            transform: scale(1.05);
+            color: #000000;
+            box-shadow: 0 6px 15px rgba(173, 255, 0, 0.6);
+        }
+        .result-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: #FFFFFF;
+            padding: 25px;
+            border-radius: 12px;
+            z-index: 1000;
+            width: 90%;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            direction: ltr;
+            text-align: left;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(173, 255, 0, 0.2);
+        }
+        .tab-container {
+            margin-top: 15px;
+        }
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 10px 15px;
+            background-color: #ADFF00;
+            color: #001B16;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            flex: 1;
+            min-width: 90px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .tab-btn.active {
+            background-color: #FFFFFF;
+            color: #001B16;
+            transform: scale(1.02);
+        }
+        .tab-btn:hover {
+            background-color: #BFFF00;
+            transform: scale(1.03);
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 0.95em;
+            line-height: 1.7;
+            border: 1px solid rgba(173, 255, 0, 0.15);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-content h3 {
+            color: #ADFF00;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .tab-content p {
+            margin: 10px 0;
+            color: #E0E0E0;
+        }
+        .tab-content button {
+            background-color: #ADFF00;
+            color: #001B16;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .tab-content button:hover {
+            background-color: #BFFF00;
+            transform: scale(1.05);
+        }
+        .close-btn {
+            margin-top: 20px;
+            background-color: #ADFF00;
+            color: #001B16;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(173, 255, 0, 0.3);
+        }
+        .close-btn:hover {
+            background-color: #BFFF00;
+            transform: scale(1.05);
+        }
+        @media (max-width: 450px) {
+            .app-title {
+                font-size: 1.4em;
+                letter-spacing: 1px;
+            }
+            .numerology-app-container input,
+            .numerology-app-container select {
+                font-size: 0.9em;
+                padding: 10px;
+            }
+            .submit-btn {
+                font-size: 1.1em;
+                padding: 12px;
+                width: 90%;
+            }
+            .tab-btn {
+                font-size: 0.85em;
+                padding: 8px 12px;
+                min-width: 80px;
+            }
+            .tab-content {
+                font-size: 0.9em;
+                padding: 12px;
+            }
+            .result-box {
+                width: 95%;
+                padding: 20px;
+                max-height: 80vh;
+            }
+            .tab-content h3 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="numerology-app-container">
+        <h2 class="app-title">Ultimate Numerology & Astrology Analyzer</h2>
+        <form id="ultimate-form" method="POST">
+            <div class="input-box">
+                <input type="text" name="firstName" id="firstName" placeholder="Enter Your First Name" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="lastName" id="lastName" placeholder="Enter Your Last Name" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="day" id="day" placeholder="Enter Your Birth Day (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="month" id="month" placeholder="Enter Your Birth Month (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="year" id="year" placeholder="Enter Your Birth Year (e.g., 1990)" min="1900" max="2025" required>
+            </div>
+            <div class="input-box">
+                <select name="gender" id="gender" required>
+                    <option value="">Select Your Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <input type="text" name="motherName" id="motherName" placeholder="Enter Your Mother's First Name" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="spouseName" id="spouseName" placeholder="Enter Your Spouse's First Name (Optional)">
+            </div>
+            <div class="input-box">
+                <input type="text" name="fatherName" id="fatherName" placeholder="Enter Your Father's First Name (Optional)">
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherDay" id="fatherDay" placeholder="Enter Your Father's Birth Day (1-31)" min="1" max="31">
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherMonth" id="fatherMonth" placeholder="Enter Your Father's Birth Month (1-12)" min="1" max="12">
+            </div>
+            <div class="input-box">
+                <input type="number" name="fatherYear" id="fatherYear" placeholder="Enter Your Father's Birth Year (e.g., 1980)" min="1900" max="2025">
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherDay" id="motherDay" placeholder="Enter Your Mother's Birth Day (1-31)" min="1" max="31">
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherMonth" id="motherMonth" placeholder="Enter Your Mother's Birth Month (1-12)" min="1" max="12">
+            </div>
+            <div class="input-box">
+                <input type="number" name="motherYear" id="motherYear" placeholder="Enter Your Mother's Birth Year (e.g., 1980)" min="1900" max="2025">
+            </div>
+            <div class="input-box">
+                <input type="text" name="person2Name" id="person2Name" placeholder="Enter Second Person's First Name (Optional)">
+            </div>
+            <div class="input-box">
+                <select name="person2Gender" id="person2Gender">
+                    <option value="">Select Second Person's Gender (Optional)</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <input type="text" name="jobTitle" id="jobTitle" placeholder="Enter Your Job Title (Optional)">
+            </div>
+            <div class="input-box">
+                <select name="businessField" id="businessField" onchange="toggleCustomField()" required>
+                    <option value="">Select Your Business Field</option>
+                    <option value="technology">Technology</option>
+                    <option value="fashion">Fashion & Apparel</option>
+                    <option value="food">Food & Beverage</option>
+                    <option value="services">Services</option>
+                    <option value="general">General Business</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="input-box" id="customFieldContainer" style="display: none;">
+                <input type="text" name="customField" id="customField" placeholder="Specify Your Business Field">
+            </div>
+            <button type="submit" class="submit-btn">Calculate & Analyze Everything</button>
+        </form>
+    </div>
+    <div id="result-box" class="result-box">
+        <div id="result-tabs" class="tab-container"></div>
+        <button class="close-btn" onclick="closeResultBox()">Close Results</button>
+    </div>
+    <script>
+        const letterToNumber = {
+            'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9,
+            'j': 1, 'k': 2, 'l': 3, 'm': 4, 'n': 5, 'o': 6, 'p': 7, 'q': 8, 'r': 9,
+            's': 1, 't': 2, 'u': 3, 'v': 4, 'w': 5, 'x': 6, 'y': 7, 'z': 8
+        };
+        const suggestedNames = {
+            financial: ["Frederick", "Barrett", "Dominic"],
+            emotional: ["Natalie", "Miles", "Penelope"],
+            business: ["Kenneth", "Allison", "Samuel"]
+        };
+        const boyNames = ["James", "Ethan", "Lucas", "Oliver", "Henry", "Noah", "Liam", "Mason", "Jack", "William"];
+        const girlNames = ["Emma", "Olivia", "Sophia", "Isabella", "Ava", "Mia", "Charlotte", "Amelia", "Harper", "Evelyn"];
+        const brandBaseNames = {
+            technology: ["Tech", "Innovate", "Sys"],
+            fashion: ["Style", "Vogue", "Trend"],
+            food: ["Bites", "Flavor", "Eats"],
+            services: ["Solutions", "Care", "Pro"],
+            general: ["Works", "Edge", "Core"]
+        };
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22 && number !== 33) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name.toLowerCase()) {
+                if (letterToNumber[char]) total += letterToNumber[char];
+            }
+            return sumDigits(total);
+        }
+        function toggleCustomField() {
+            const businessField = document.getElementById('businessField').value;
+            const customFieldContainer = document.getElementById('customFieldContainer');
+            const customField = document.getElementById('customField');
+            customFieldContainer.style.display = businessField === 'other' ? 'block' : 'none';
+            customField.required = businessField === 'other';
+        }
+        document.getElementById('ultimate-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const day = parseInt(document.getElementById('day').value);
+            const month = parseInt(document.getElementById('month').value);
+            const year = parseInt(document.getElementById('year').value);
+            const gender = document.getElementById('gender').value;
+            const motherName = document.getElementById('motherName').value.trim();
+            const spouseName = document.getElementById('spouseName').value.trim();
+            const fatherName = document.getElementById('fatherName').value.trim();
+            const fatherDay = parseInt(document.getElementById('fatherDay').value) || 0;
+            const fatherMonth = parseInt(document.getElementById('fatherMonth').value) || 0;
+            const fatherYear = parseInt(document.getElementById('fatherYear').value) || 0;
+            const motherDay = parseInt(document.getElementById('motherDay').value) || 0;
+            const motherMonth = parseInt(document.getElementById('motherMonth').value) || 0;
+            const motherYear = parseInt(document.getElementById('motherYear').value) || 0;
+            const person2Name = document.getElementById('person2Name').value.trim();
+            const person2Gender = document.getElementById('person2Gender').value;
+            const jobTitle = document.getElementById('jobTitle').value.trim();
+            let businessField = document.getElementById('businessField').value;
+            const customField = document.getElementById('customField').value.trim();
+            if (!firstName || !lastName || !day || !month || !year || !gender || !motherName || !businessField) {
+                alert('Please ensure all required fields are filled to proceed with your comprehensive numerology and astrology analysis.');
+                return;
+            }
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2025) {
+                alert('Please provide a valid birth date within the range of 1-31 for day, 1-12 for month, and 1900-2025 for year to ensure accurate calculations.');
+                return;
+            }
+            if (businessField === 'other' && !customField) {
+                alert('Please specify your custom business field when selecting "Other" to allow for a tailored analysis.');
+                return;
+            }
+            if (businessField === 'other') businessField = customField;
+            const fullName = firstName + ' ' + lastName;
+            const results = {};
+            const destinyNumber = sumDigits(year + month + day);
+            results['destiny'] = `
+                <h3>Your Destiny Number: ${destinyNumber}</h3>
+                <p><strong>Your Birth Date Provided:</strong> ${month}/${day}/${year}</p>
+                <p><strong>How This Number Was Derived:</strong> The Destiny Number, often referred to as the Life Path Number, is calculated by adding all the digits of your birth date together (${year} + ${month} + ${day} = ${year + month + day}) and then reducing that sum to a single digit or master number through repeated addition of its digits, resulting in ${destinyNumber}. This number represents the core essence of your life’s journey and the ultimate purpose you are destined to fulfill.</p>
+                <p>${getDestinyMeaning(destinyNumber)}</p>
+            `;
+            const expressionNumber = calculateNameNumber(fullName);
+            results['expression'] = `
+                <h3>Your Expression Number: ${expressionNumber}</h3>
+                <p><strong>Your Full Name:</strong> ${fullName}</p>
+                <p><strong>How This Number Was Derived:</strong> The Expression Number, sometimes called the Destiny Number in alternative numerology systems, is determined by assigning numerical values to each letter in your full name based on a standard numerological chart (A=1, B=2, ..., Z=8), summing those values, and reducing the total to a single digit or master number. For your name, this process yields ${expressionNumber}, reflecting the talents, abilities, and characteristics you naturally exhibit to the world.</p>
+                <p>${getExpressionMeaning(expressionNumber)}</p>
+            `;
+            const yearSum = year.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const yearReduced = sumDigits(yearSum);
+            let kuaNumber = gender === 'male' ? sumDigits(11 - yearReduced) : sumDigits(4 + yearReduced);
+            if (kuaNumber === 5) kuaNumber = gender === 'male' ? 2 : 8;
+            const kuaMeaning = getKuaNumberMeaning(kuaNumber);
+            results['kua'] = `
+                <h3>Your Kua Number: ${kuaNumber}</h3>
+                <p><strong>How This Number Was Derived:</strong> The Kua Number, rooted in Feng Shui principles, is calculated using your birth year. The digits of ${year} are summed (${yearSum}), reduced to ${yearReduced}, and then adjusted based on gender: for males, 11 minus this number, and for females, 4 plus this number, with further reduction to a single digit unless it’s a master number. If the result is 5, it adjusts to 2 for males and 8 for females, giving you ${kuaNumber}. This number reveals your personal energy alignment with the universe.</p>
+                <p>${kuaMeaning.description}</p>
+                <p><strong>Recommended Sleep Direction:</strong> ${kuaMeaning.sleepDirection}</p>
+                <p><strong>Recommended Business Direction:</strong> ${kuaMeaning.businessDirection}</p>
+            `;
+            const vowels = /[aeiou]/g;
+            let soulTotal = 0;
+            const vowelMatches = fullName.match(vowels) || [];
+            for (let vowel of vowelMatches) soulTotal += letterToNumber[vowel];
+            const soulNumber = sumDigits(soulTotal);
+            results['soul'] = `
+                <h3>Your Soul Urge Number: ${soulNumber}</h3>
+                <p><strong>Vowels in Your Name:</strong> ${vowelMatches.join(', ') || 'None'}</p>
+                <p><strong>How This Number Was Derived:</strong> The Soul Urge Number, also known as the Heart’s Desire Number, is calculated by isolating the vowels (A, E, I, O, U) in your full name, assigning them numerical values (A=1, E=5, I=9, O=6, U=3), summing those values (${soulTotal}), and reducing the total to a single digit or master number, resulting in ${soulNumber}. This number uncovers the deepest motivations, desires, and emotional drives that fuel your soul’s purpose.</p>
+                <p>${getSoulNumberMeaning(soulNumber)}</p>
+            `;
+            const userNumber = calculateNameNumber(fullName);
+            const motherNumber = calculateNameNumber(motherName);
+            const spouseNumber = spouseName ? calculateNameNumber(spouseName) : 'Not Provided';
+            const birthNumber = sumDigits(day + month + yearSum);
+            results['nameAnalysis'] = `
+                <h3>Your Comprehensive Name and Birth Number Analysis</h3>
+                <p><strong>Your Name Number:</strong> ${userNumber}</p>
+                <p><strong>Your Mother’s Name Number:</strong> ${motherNumber}</p>
+                <p><strong>Your Spouse’s Name Number:</strong> ${spouseNumber}</p>
+                <p><strong>Your Birth Number:</strong> ${birthNumber}</p>
+                <p><strong>Detailed Analysis:</strong> This section explores the intricate interplay between your name number (${userNumber}), derived from the sum of letter values in your full name reduced to a single digit, and your birth number (${birthNumber}), calculated by summing your birth date components (${day} + ${month} + ${yearSum}) and reducing them. Additionally, it considers familial influences through your mother’s name number (${motherNumber}) and, if provided, your spouse’s name number (${spouseNumber}). These numbers collectively reveal how your personal identity aligns with your family dynamics, offering insights into inherited traits, relational harmony, and potential life synergies.</p>
+            `;
+            const combinedNumber = sumDigits(userNumber + birthNumber);
+            const personalAnalysis = getPersonalAnalysis(combinedNumber);
+            results['personalAnalysis'] = `
+                <h3>Your Personal Numerology Analysis</h3>
+                <p><strong>Your Luck Number:</strong> ${combinedNumber}</p>
+                <p><strong>Optimal Work Direction:</strong> ${personalAnalysis.workDirection}</p>
+                <p><strong>Optimal Sleep Direction:</strong> ${personalAnalysis.sleepDirection}</p>
+                <p><strong>Suggested Logo Colors:</strong> ${personalAnalysis.logoColors}</p>
+                <p><strong>Suggested Daily Colors:</strong> ${personalAnalysis.dailyColors}</p>
+                <p><strong>Your Lucky Stone:</strong> ${personalAnalysis.luckyStone}</p>
+                <p><strong>Recommended Career Path:</strong> ${personalAnalysis.jobSuggestion}</p>
+                <p><strong>Detailed Analysis:</strong> Your Luck Number (${combinedNumber}) is derived by combining your Name Number (${userNumber}) and Birth Number (${birthNumber}), then reducing the sum. This number serves as a powerful indicator of your inherent fortune and personal energy. The optimal directions for work and sleep enhance your productivity and rest, respectively, based on Feng Shui alignments. The suggested colors for logos and daily wear resonate with your vibrational energy, amplifying your presence and luck. Your lucky stone is a natural talisman to carry or wear, and the career path aligns with your numerological strengths, guiding you toward fulfillment and success.</p>
+            `;
+            if (person2Name && person2Gender) {
+                const person2Number = calculateNameNumber(person2Name);
+                const relationNumber = sumDigits(userNumber + person2Number);
+                const relationAnalysis = getRelationshipAnalysis(relationNumber);
+                results['relationship'] = `
+                    <h3>Your Relationship Compatibility Analysis</h3>
+                    <p><strong>Your Relationship Number:</strong> ${relationNumber}</p>
+                    <p><strong>Future Outlook:</strong> ${relationAnalysis.future}</p>
+                    <p><strong>Economic Prospects:</strong> ${relationAnalysis.economic}</p>
+                    <p><strong>Relationship Advice:</strong> ${relationAnalysis.advice}</p>
+                    <p><strong>Detailed Analysis:</strong> This compatibility analysis is based on your Name Number (${userNumber}) and the Name Number of the second person (${person2Number}), summed and reduced to ${relationNumber}. This number reflects the energetic harmony between you and ${person2Name}, providing a comprehensive forecast of your shared future, financial potential, and practical advice to nurture your relationship. It considers emotional, practical, and spiritual dimensions to offer a holistic view of your partnership’s strengths and areas for growth.</p>
+                `;
+            }
+            results['brandName'] = `
+                <h3>Your Brand Name Suggestion</h3>
+                <p><strong>Your Business Field:</strong> ${businessField}</p>
+                <p><strong>Instructions:</strong> Click the button below to generate a personalized brand name based on your input data, including your first name, luck number, business field, and job title if provided.</p>
+                <button onclick="suggestBrandName('${firstName}', ${combinedNumber}, '${businessField}', '${jobTitle}')">Generate Your Brand Name</button>
+            `;
+            results['childName'] = `
+                <h3>Your Child Name Suggestion</h3>
+                <p><strong>Instructions:</strong> Click the button below to calculate ideal names for a boy and girl based on the numerological harmony of your parental data, including names and birth dates of both parents if provided.</p>
+                <button onclick="suggestChildName('${fatherName}', ${fatherDay}, ${fatherMonth}, ${fatherYear}, '${motherName}', ${motherDay}, ${motherMonth}, ${motherYear})">Calculate Child Names</button>
+            `;
+            const zodiacSign = getZodiacSign(month, day);
+            const horoscope = getHoroscope(zodiacSign, combinedNumber);
+            results['astrology'] = `
+                <h3>Your Astrology and Horoscope Analysis</h3>
+                <p><strong>Your Zodiac Sign:</strong> ${zodiacSign}</p>
+                <p><strong>Your Personality Traits:</strong> ${horoscope.personality}</p>
+                <p><strong>Your Future Forecast:</strong> ${horoscope.future}</p>
+                <p><strong>Your Love Life Outlook:</strong> ${horoscope.love}</p>
+                <p><strong>Your Career Prospects:</strong> ${horoscope.career}</p>
+                <p><strong>Your Lucky Days:</strong> ${horoscope.luckyDays}</p>
+                <p><strong>Your Lucky Numbers:</strong> ${horoscope.luckyNumbers}</p>
+                <p><strong>Detailed Analysis:</strong> Determined by your birth date (${month}/${day}), your zodiac sign of ${zodiacSign} provides a celestial blueprint of your character, destiny, and life tendencies. Combined with your Luck Number (${combinedNumber}), this analysis offers an in-depth exploration of your personality, a detailed prediction of your future, insights into your romantic potential, career guidance, and the days and numbers that will bring you the most fortune. This synthesis of astrology and numerology delivers a profound understanding of your cosmic influences.</p>
+            `;
+            results['newName'] = `
+                <h3>Your New Name Suggestion</h3>
+                <p><strong>Instructions:</strong> Select a specific challenge you’re facing from the dropdown below, then click the button to receive a suggested name that aligns with numerological solutions to enhance your life in that area.</p>
+                <select id="problem">
+                    <option value="">Choose Your Current Challenge</option>
+                    <option value="financial">Financial Difficulties</option>
+                    <option value="emotional">Emotional Challenges</option>
+                    <option value="business">Business Issues</option>
+                </select>
+                <button onclick="suggestNewName(${userNumber}, '${fullName}')">Suggest a New Name</button>
+            `;
+            const tabContainer = document.getElementById('result-tabs');
+            tabContainer.innerHTML = '';
+            let buttons = '';
+            let contents = '';
+            const tabNames = {
+                'destiny': 'Destiny Number Analysis',
+                'expression': 'Expression Number Analysis',
+                'kua': 'Kua Number Analysis',
+                'soul': 'Soul Urge Number Analysis',
+                'nameAnalysis': 'Name and Birth Number Analysis',
+                'personalAnalysis': 'Personal Numerology Analysis',
+                'relationship': 'Relationship Compatibility Analysis',
+                'brandName': 'Brand Name Suggestion',
+                'childName': 'Child Name Suggestion',
+                'astrology': 'Astrology and Horoscope Analysis',
+                'newName': 'New Name Suggestion'
+            };
+            Object.keys(results).forEach((key, index) => {
+                buttons += `<button class="tab-btn ${index === 0 ? 'active' : ''}" onclick="openTab('${key}')">${tabNames[key]}</button>`;
+                contents += `<div id="${key}" class="tab-content ${index === 0 ? 'active' : ''}">${results[key]}</div>`;
+            });
+            tabContainer.innerHTML = `
+                <div class="tab-buttons">${buttons}</div>
+                ${contents}
+            `;
+            document.getElementById('result-box').style.display = 'block';
+        });
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="openTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        function closeResultBox() {
+            document.getElementById('result-box').style.display = 'none';
+        }
+        function suggestNewName(userNumber, fullName) {
+            const problem = document.getElementById('problem').value;
+            if (!problem) {
+                alert("Please select a challenge from the dropdown to receive a tailored name suggestion.");
+                return;
+            }
+            const suitableNumbers = { financial: [8, 4, 1], emotional: [2, 6, 9], business: [3, 7, 8] };
+            const isSuitable = suitableNumbers[problem].includes(userNumber);
+            const suggestedName = suggestedNames[problem][Math.floor(Math.random() * 3)];
+            document.getElementById('newName').innerHTML = `
+                <h3>Your New Name Suggestion</h3>
+                <p><strong>Analysis and Recommendation:</strong> Based on your current Name Number (${userNumber}), we’ve assessed its compatibility with overcoming ${problem} challenges. Numbers aligned with financial success are 8, 4, and 1; for emotional balance, 2, 6, and 9; and for business prosperity, 3, 7, and 8. Your number ${isSuitable ? `is already ideal for addressing ${problem}, as it matches the optimal range, suggesting your current name (${fullName}) carries a vibration conducive to success in this area.` : `does not align perfectly with ${problem} solutions. To enhance your energy in this domain, we suggest adopting the name "${suggestedName}" (Number: ${calculateNameNumber(suggestedName)}), which resonates with the vibrational frequencies needed to overcome your specified challenge and bring greater harmony and achievement.`}</p>
+            `;
+        }
+        function suggestChildName(fatherName, fatherDay, fatherMonth, fatherYear, motherName, motherDay, motherMonth, motherYear) {
+            if (!fatherName || !fatherDay || !fatherMonth || !fatherYear || !motherDay || !motherMonth || !motherYear) {
+                document.getElementById('childName').innerHTML = `<h3>Your Child Name Suggestion</h3><p>Please provide complete birth details for both parents to generate accurate and harmonious name suggestions for your child.</p>`;
+                return;
+            }
+            const fatherNumber = sumDigits(calculateNameNumber(fatherName) + fatherDay + fatherMonth + fatherYear);
+            const motherNumber = sumDigits(calculateNameNumber(motherName) + motherDay + motherMonth + motherYear);
+            const childCombined = sumDigits(fatherNumber + motherNumber);
+            const boyName = findSuitableName(boyNames, childCombined, [1, 2, 3, 4, 6, 7, 8, 9]);
+            const girlName = findSuitableName(girlNames, childCombined, [1, 2, 3, 4, 6, 7, 8, 9]);
+            document.getElementById('childName').innerHTML = `
+                <h3>Your Child Name Suggestion</h3>
+                <p><strong>Suggested Boy Name:</strong> ${boyName.name} (Number: ${boyName.number})</p>
+                <p><strong>Suggested Girl Name:</strong> ${girlName.name} (Number: ${girlName.number})</p>
+                <p><strong>Detailed Analysis:</strong> These names are derived by calculating the combined numerological influence of both parents. Your father’s data (${fatherName}, born ${fatherMonth}/${fatherDay}/${fatherYear}) yields a number of ${fatherNumber}, and your mother’s data (${motherName}, born ${motherMonth}/${motherDay}/${motherYear}) yields ${motherNumber}. Together, they produce a child compatibility number of ${childCombined}. The suggested names, ${boyName.name} for a boy and ${girlName.name} for a girl, are chosen to harmonize with this number, ensuring your child’s name aligns with familial energy for a balanced, prosperous, and fulfilling life.</p>
+            `;
+        }
+        function suggestBrandName(firstName, combinedNumber, businessField, jobTitle) {
+            const suffix = jobTitle ? jobTitle.split(' ')[0] : brandBaseNames[businessField][Math.floor(Math.random() * 3)];
+            const brandName = `${firstName}${suffix}`;
+            document.getElementById('brandName').innerHTML = `
+                <h3>Your Brand Name Suggestion</h3>
+                <p><strong>Suggested Brand Name:</strong> ${brandName} (Number: ${calculateNameNumber(brandName)})</p>
+                <p><strong>Detailed Analysis:</strong> This brand name, ${brandName}, is a personalized creation combining your first name (${firstName}) with a suffix derived from ${jobTitle ? `your job title (${jobTitle})` : `a term aligned with your business field (${businessField})`}. Its numerological value (${calculateNameNumber(brandName)}) resonates with your Luck Number (${combinedNumber}), ensuring it carries a vibration of success, recognition, and alignment with your professional aspirations in ${businessField}. This name is designed to attract opportunities, enhance brand identity, and reflect your unique energy in the marketplace.</p>
+            `;
+        }
+        function findSuitableName(nameList, targetNumber, optimalNumbers) {
+            let bestName = nameList[0];
+            let bestNumber = calculateNameNumber(bestName);
+            for (let name of nameList) {
+                const nameNumber = calculateNameNumber(name);
+                if (optimalNumbers.includes(nameNumber) && Math.abs(nameNumber - targetNumber) < Math.abs(bestNumber - targetNumber)) {
+                    bestName = name;
+                    bestNumber = nameNumber;
+                }
+            }
+            return { name: bestName, number: bestNumber };
+        }
+        function getZodiacSign(month, day) {
+            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Aries";
+            if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Taurus";
+            if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gemini";
+            if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Cancer";
+            if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leo";
+            if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgo";
+            if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+            if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Scorpio";
+            if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittarius";
+            if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricorn";
+            if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
+            if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Pisces";
+        }
+        function getHoroscope(sign, number) {
+            const horoscopes = {
+                "Aries": {
+                    personality: "You are a bold, ambitious, and fiercely independent individual, always ready to take the lead and face challenges head-on with unwavering courage and enthusiasm.",
+                    future: "The coming year promises significant personal growth, with opportunities to assert your individuality and pursue ambitious goals that could redefine your life’s direction.",
+                    love: "Your romantic life will be passionate and dynamic, filled with intense connections that thrive on mutual respect and shared adventures.",
+                    career: "Take charge of your professional path, as leadership roles and bold initiatives will pave the way for recognition and success.",
+                    luckyDays: "Tuesdays and Sundays",
+                    luckyNumbers: "1, 9, 19"
+                },
+                "Taurus": {
+                    personality: "You are a reliable, patient, and grounded person, valuing stability and comfort while approaching life with a calm, determined persistence.",
+                    future: "Expect a year of steady progress and emotional security, with opportunities to build a solid foundation for long-term achievements.",
+                    love: "Your relationships will deepen through loyalty and trust, creating enduring bonds that bring comfort and peace.",
+                    career: "Focus on consistent effort and practical strategies, as these will lead to gradual but substantial professional rewards.",
+                    luckyDays: "Fridays and Mondays",
+                    luckyNumbers: "2, 6, 15"
+                },
+                "Gemini": {
+                    personality: "You are a curious, adaptable, and communicative soul, thriving on variety and intellectual stimulation in all aspects of life.",
+                    future: "A year of exciting changes and diverse experiences awaits, with new connections and ideas shaping your path forward.",
+                    love: "Playful and intellectually stimulating relationships will flourish, driven by lively conversations and mutual curiosity.",
+                    career: "Leverage your networking skills and versatility, as opportunities will arise through collaboration and creative problem-solving.",
+                    luckyDays: "Wednesdays and Thursdays",
+                    luckyNumbers: "3, 5, 14"
+                },
+                "Cancer": {
+                    personality: "You are a nurturing, intuitive, and deeply emotional individual, prioritizing family, security, and meaningful connections above all else.",
+                    future: "This year emphasizes family ties and personal healing, with opportunities to strengthen your emotional roots and find inner peace.",
+                    love: "Deep, soulful relationships will grow, offering comfort and a profound sense of belonging.",
+                    career: "Pursue roles that align with your values and allow you to care for others, as these will bring fulfillment and success.",
+                    luckyDays: "Mondays and Thursdays",
+                    luckyNumbers: "2, 7, 11"
+                },
+                "Leo": {
+                    personality: "You are a confident, creative, and charismatic leader, radiating warmth and inspiring others with your vibrant energy and bold presence.",
+                    future: "A year of shining brightly lies ahead, with chances to showcase your talents and achieve recognition on a grand scale.",
+                    love: "Expect grand, passionate romances that celebrate your individuality and bring joy to your heart.",
+                    career: "Step into leadership positions and pursue creative endeavors, as your boldness will lead to significant professional triumphs.",
+                    luckyDays: "Sundays and Tuesdays",
+                    luckyNumbers: "1, 5, 10"
+                },
+                "Virgo": {
+                    personality: "You are a practical, precise, and analytical person, dedicated to perfection and service with a keen eye for detail.",
+                    future: "This year focuses on self-improvement and organization, with opportunities to refine your skills and achieve mastery in your pursuits.",
+                    love: "Relationships will thrive through acts of service and mutual support, building a foundation of trust and care.",
+                    career: "Your attention to detail and methodical approach will drive success in roles requiring precision and expertise.",
+                    luckyDays: "Wednesdays and Fridays",
+                    luckyNumbers: "4, 6, 13"
+                },
+                "Libra": {
+                    personality: "You are a charming, balanced, and diplomatic individual, seeking harmony and beauty in all your interactions and surroundings.",
+                    future: "A year of equilibrium and aesthetic fulfillment awaits, with opportunities to create peace and strengthen partnerships.",
+                    love: "Balanced and harmonious relationships will prosper, marked by mutual respect and shared values.",
+                    career: "Collaborative efforts and creative projects will lead to professional growth and satisfaction.",
+                    luckyDays: "Fridays and Saturdays",
+                    luckyNumbers: "6, 9, 15"
+                },
+                "Scorpio": {
+                    personality: "You are an intense, passionate, and transformative soul, driven by depth, mystery, and an unyielding desire for truth.",
+                    future: "Expect a year of profound change and personal empowerment, with opportunities to shed old patterns and embrace your inner strength.",
+                    love: "Deeply intimate and transformative connections will define your romantic life, fueled by trust and intensity.",
+                    career: "Trust your instincts in professional matters, as bold moves and strategic risks will yield significant rewards.",
+                    luckyDays: "Tuesdays and Thursdays",
+                    luckyNumbers: "8, 9, 18"
+                },
+                "Sagittarius": {
+                    personality: "You are an adventurous, optimistic, and free-spirited individual, always seeking knowledge, growth, and new horizons.",
+                    future: "A year of exploration and expansion lies ahead, with opportunities to travel, learn, and broaden your perspective.",
+                    love: "Lighthearted and liberating relationships will bring joy, thriving on freedom and shared adventures.",
+                    career: "Take risks and pursue ambitious goals, as your optimism will open doors to exciting professional opportunities.",
+                    luckyDays: "Thursdays and Sundays",
+                    luckyNumbers: "3, 7, 12"
+                },
+                "Capricorn": {
+                    personality: "You are an ambitious, disciplined, and pragmatic person, committed to achieving long-term success through hard work and structure.",
+                    future: "This year promises rewards for your dedication, with opportunities to climb higher and secure lasting achievements.",
+                    love: "Steady, reliable relationships will grow stronger, built on trust and mutual ambition.",
+                    career: "Focus on long-term goals and leadership roles, as your persistence will lead to substantial career advancements.",
+                    luckyDays: "Saturdays and Mondays",
+                    luckyNumbers: "4, 8, 10"
+                },
+                "Aquarius": {
+                    personality: "You are an innovative, independent, and visionary individual, driven by originality and a desire to improve the world around you.",
+                    future: "A year of breakthroughs and unconventional paths awaits, with opportunities to innovate and inspire change.",
+                    love: "Relationships valuing freedom and intellectual connection will thrive, offering space for individuality.",
+                    career: "Pursue bold, forward-thinking projects, as your unique ideas will lead to professional success.",
+                    luckyDays: "Saturdays and Wednesdays",
+                    luckyNumbers: "7, 9, 11"
+                },
+                "Pisces": {
+                    personality: "You are an empathetic, dreamy, and intuitive soul, guided by compassion, creativity, and a deep connection to the spiritual realm.",
+                    future: "This year will be soulful and reflective, with opportunities to explore your inner world and pursue artistic passions.",
+                    love: "Emotionally rich and compassionate relationships will deepen, offering profound connection and understanding.",
+                    career: "Creative and altruistic paths will bring fulfillment, as your sensitivity shines in meaningful work.",
+                    luckyDays: "Thursdays and Mondays",
+                    luckyNumbers: "3, 7, 12"
+                }
+            };
+            return horoscopes[sign];
+        }
+        function getDestinyMeaning(number) {
+            const meanings = {
+                1: "Your Destiny Number of 1 signifies a life path marked by leadership, independence, and pioneering spirit. You are destined to carve your own unique trail through the world, driven by an innate desire to stand out and achieve greatness on your own terms. This number suggests that your journey will be one of self-discovery and bold action, where you’ll face challenges that test your resilience but ultimately lead to personal triumph. Your purpose is to inspire others with your courage and originality, often taking the lead in situations where others hesitate. Embrace your individuality, as it is the key to unlocking your fullest potential and fulfilling your life’s grand mission.",
+                2: "With a Destiny Number of 2, your life path is intricately woven with themes of harmony, cooperation, and emotional connection. You are destined to be a peacemaker, someone who brings people together and fosters understanding in even the most challenging circumstances. Your journey will emphasize the importance of relationships, both personal and professional, and your ability to empathize and support others will be your greatest strength. This number indicates a life filled with opportunities to heal divides and create balance, requiring you to develop patience and diplomacy. Your ultimate purpose is to cultivate unity and love, leaving a legacy of compassion and mutual respect.",
+                3: "A Destiny Number of 3 heralds a vibrant life path centered on creativity, joy, and self-expression. You are destined to illuminate the world with your artistic talents, infectious enthusiasm, and ability to uplift those around you. Your journey will be a colorful tapestry of experiences where your imagination and charisma shine, often leading you to pursuits in art, communication, or entertainment. This number suggests that your purpose lies in sharing your inner light, inspiring others to embrace their own creativity and find happiness. Your challenge will be to focus your energy and avoid scattering your gifts, as your destiny calls you to leave a lasting mark through joyful expression.",
+                4: "Your Destiny Number of 4 indicates a life path built on stability, hard work, and a deep sense of purpose. You are destined to be a cornerstone in your community or field, someone who constructs solid foundations through dedication and practicality. Your journey will involve creating order out of chaos, whether through physical labor, organizational skills, or disciplined effort, and your reliability will earn you respect and trust. This number points to a life of tangible achievements, where patience and persistence are your guiding forces. Your purpose is to provide security and structure, both for yourself and others, fulfilling your destiny as a steadfast builder of lasting value.",
+                5: "With a Destiny Number of 5, your life path is an exhilarating adventure defined by freedom, change, and boundless curiosity. You are destined to explore the world in all its diversity, embracing new experiences, cultures, and ideas with an open heart and fearless spirit. Your journey will be marked by constant evolution, as you adapt to shifting circumstances and seek liberation from anything that confines you. This number suggests a purpose rooted in versatility and resilience, where your ability to navigate uncertainty becomes your strength. Your destiny is to live boldly, inspiring others to break free and embrace the beauty of a life unrestrained by convention.",
+                6: "A Destiny Number of 6 reveals a life path devoted to love, responsibility, and service to others. You are destined to be a nurturer, someone whose warmth and dedication create a haven for those you care about, whether family, friends, or community. Your journey will center on cultivating beauty, harmony, and emotional security, often placing the needs of others before your own. This number indicates a life rich with opportunities to heal and uplift, requiring you to balance selflessness with self-care. Your purpose is to leave a legacy of compassion and care, fulfilling your destiny as a beacon of unconditional love and support.",
+                7: "Your Destiny Number of 7 signifies a profound life path of wisdom, introspection, and spiritual discovery. You are destined to seek the deeper truths of existence, delving into the mysteries of life with a contemplative and analytical mind. Your journey will be one of solitude and study, where your intuition and intellect guide you toward enlightenment and understanding. This number suggests a purpose tied to uncovering hidden knowledge, often leading you to roles as a thinker, researcher, or spiritual guide. Your destiny is to illuminate the unknown, sharing your insights to enrich the world with clarity and profound awareness.",
+                8: "With a Destiny Number of 8, your life path is a powerful ascent toward success, authority, and material mastery. You are destined to achieve greatness through ambition, determination, and an unyielding drive to overcome obstacles. Your journey will involve navigating the realms of power and wealth, where your ability to manage resources and lead with confidence will define your accomplishments. This number points to a life of significant influence, requiring you to balance material pursuits with ethical integrity. Your purpose is to wield power responsibly, fulfilling your destiny as a transformative force in the world of achievement and recognition.",
+                9: "A Destiny Number of 9 marks a life path of compassion, idealism, and global impact. You are destined to be a humanitarian, someone whose vision and generosity touch lives far beyond your immediate circle. Your journey will be shaped by a deep desire to improve the world, often through creative, altruistic, or spiritual endeavors that inspire hope and change. This number suggests a purpose of selflessness, where your ability to empathize and uplift others becomes your legacy. Your destiny is to transcend personal gain, fulfilling your life’s mission by leaving the world a better place through your boundless kindness and visionary spirit."
+            };
+            return meanings[number];
+        }
+        function getExpressionMeaning(number) {
+            const meanings = {
+                1: "Your Expression Number of 1 reveals that you present yourself to the world as a bold, independent, and pioneering individual, radiating confidence and a natural ability to lead. People perceive you as someone unafraid to take initiative, often stepping forward with innovative ideas and a strong sense of self that inspires trust and admiration. Your outward persona is marked by determination and originality, making you a trailblazer in your personal and professional spheres. This number suggests that your presence encourages others to embrace their own strength, as you consistently demonstrate resilience and a proactive approach to life’s opportunities and challenges.",
+                2: "With an Expression Number of 2, you are seen by the world as a warm, empathetic, and cooperative soul, exuding a gentle strength that draws people to you. Your outward demeanor reflects a deep capacity for understanding and a genuine desire to create harmony, making you a natural mediator and confidant. People perceive you as approachable and supportive, someone who thrives in partnerships and values emotional connection above all. This number indicates that your presence fosters peace and collaboration, leaving a lasting impression of kindness and diplomacy that encourages others to seek unity and mutual respect in their interactions.",
+                3: "An Expression Number of 3 signifies that you project a vibrant, creative, and joyous energy that captivates and uplifts everyone around you. The world sees you as an expressive and charismatic individual, brimming with imagination and a contagious enthusiasm that lights up any room. Your outward persona is one of playfulness and inspiration, often shining through artistic talents or a knack for communication that leaves people feeling energized and motivated. This number suggests that your presence is a gift of positivity, encouraging others to tap into their own creativity and embrace the beauty of self-expression in their lives.",
+                4: "Your Expression Number of 4 portrays you as a dependable, practical, and grounded individual, whose steady and methodical nature earns the respect and reliance of those around you. People perceive you as someone who values structure and hard work, offering a sense of stability and trustworthiness that others can lean on in times of need. Your outward demeanor reflects a no-nonsense approach to life, coupled with a quiet strength that speaks volumes through your actions rather than words. This number indicates that your presence instills confidence and order, inspiring others to appreciate the rewards of diligence and perseverance.",
+                5: "With an Expression Number of 5, you radiate a dynamic, adventurous, and free-spirited energy that intrigues and excites those who encounter you. The world sees you as a versatile and adaptable individual, someone who embraces change with open arms and thrives on variety and exploration. Your outward persona is marked by a zest for life and a fearless curiosity, making you a magnetic force that draws others into your whirlwind of experiences. This number suggests that your presence encourages spontaneity and freedom, inspiring people to break from routine and pursue their own paths of discovery.",
+                6: "An Expression Number of 6 reveals that you project a caring, nurturing, and responsible aura, presenting yourself as a pillar of support and love to those around you. People perceive you as a compassionate and dedicated individual, someone who prioritizes the well-being of others and creates an atmosphere of warmth and security wherever you go. Your outward demeanor reflects a deep sense of duty and a talent for fostering harmony, often making you the heart of your family or community. This number indicates that your presence brings comfort and healing, encouraging others to value connection and care in their lives.",
+                7: "Your Expression Number of 7 signifies that you are seen as a thoughtful, enigmatic, and intellectually profound individual, whose quiet depth and introspective nature intrigue those around you. The world perceives you as a seeker of truth, someone who approaches life with a contemplative mind and a mysterious aura that invites curiosity. Your outward persona is one of wisdom and detachment, often drawing people in with your ability to offer unique perspectives and insightful observations. This number suggests that your presence inspires reflection and growth, encouraging others to explore the deeper layers of their own existence.",
+                8: "With an Expression Number of 8, you project a powerful, ambitious, and authoritative energy that commands respect and attention wherever you go. People see you as a determined and capable individual, someone whose drive for success and mastery over life’s challenges leaves a strong impression of confidence and control. Your outward demeanor reflects a blend of strength and pragmatism, making you a natural leader in both personal and professional arenas. This number indicates that your presence motivates others to pursue their own ambitions, showcasing the rewards of discipline and strategic effort in achieving greatness.",
+                9: "An Expression Number of 9 portrays you as a compassionate, idealistic, and visionary soul, whose generous spirit and broad perspective inspire those around you. The world perceives you as someone deeply committed to making a difference, radiating a selfless energy that touches lives with kindness and hope. Your outward persona is marked by creativity and a global outlook, often positioning you as a source of inspiration and upliftment for others. This number suggests that your presence encourages empathy and altruism, motivating people to look beyond themselves and contribute to the greater good in meaningful ways."
+            };
+            return meanings[number];
+        }
+        function getKuaNumberMeaning(number) {
+            const meanings = {
+                1: {
+                    description: "Your Kua Number of 1 aligns you with the Water element, symbolizing adaptability, intuition, and a fluid approach to life’s challenges. This number suggests that you possess a deep inner wisdom and a natural ability to flow with circumstances, much like water adapts to its surroundings. Your energy is reflective and perceptive, allowing you to navigate complex situations with grace and insight, often uncovering opportunities where others see obstacles. This alignment enhances your capacity for emotional depth and strategic thinking, making you a resourceful and resilient individual in both personal and professional realms.",
+                    sleepDirection: "North",
+                    businessDirection: "East"
+                },
+                2: {
+                    description: "With a Kua Number of 2, you are connected to the Earth element, embodying stability, nurturing, and a grounded presence that provides strength to those around you. This number indicates that your energy is steady and reliable, offering a solid foundation in times of uncertainty. You have a natural talent for creating security and fostering growth, much like the earth supports life, and your patience and practicality guide your decisions. This alignment suggests a life path where consistency and care define your success, making you a dependable force in your relationships and endeavors.",
+                    sleepDirection: "Northeast",
+                    businessDirection: "West"
+                },
+                3: {
+                    description: "Your Kua Number of 3 corresponds to the Wood element, representing growth, vitality, and a dynamic energy that propels you forward in life. This number suggests that you are driven by a vibrant and expansive spirit, akin to a tree reaching for the sky, with a natural inclination toward progress and renewal. Your enthusiasm and resilience allow you to overcome setbacks and inspire others with your forward-thinking approach. This alignment enhances your ability to innovate and thrive, positioning you as a catalyst for change and development in your personal and professional worlds.",
+                    sleepDirection: "East",
+                    businessDirection: "Southeast"
+                },
+                4: {
+                    description: "With a Kua Number of 4, you are also aligned with the Wood element, symbolizing creativity, resilience, and a flexible strength that adapts to life’s demands. This number indicates that your energy is both imaginative and enduring, much like a tree that bends without breaking, allowing you to navigate challenges with grace and ingenuity. You possess a unique ability to blend practicality with vision, making you a resourceful and inspiring presence. This alignment suggests a life path where your creativity and adaptability shine, fostering growth and harmony in all you undertake.",
+                    sleepDirection: "Southeast",
+                    businessDirection: "East"
+                },
+                6: {
+                    description: "Your Kua Number of 6 connects you to the Metal element, embodying strength, clarity, and a refined sense of purpose that shapes your life’s direction. This number suggests that your energy is disciplined and focused, much like metal forged into a precise tool, giving you a natural authority and determination. You excel in situations requiring structure and decisiveness, often serving as a guiding light for others. This alignment enhances your leadership and integrity, indicating a path where your resolve and clarity lead to significant achievements and respect.",
+                    sleepDirection: "Northwest",
+                    businessDirection: "West"
+                },
+                7: {
+                    description: "With a Kua Number of 7, you are linked to the Metal element, symbolizing charm, precision, and a magnetic energy that draws others to you. This number indicates that your presence is both polished and persuasive, much like finely crafted metal, blending strength with an appealing softness. You have a natural talent for communication and refinement, making you adept at influencing and inspiring those around you. This alignment suggests a life path where your charisma and meticulousness shine, fostering success through elegance and strategic interaction.",
+                    sleepDirection: "West",
+                    businessDirection: "Northwest"
+                },
+                8: {
+                    description: "Your Kua Number of 8 aligns you with the Earth element, representing endurance, wisdom, and a deep-rooted stability that anchors your life. This number suggests that your energy is solid and insightful, much like a mountain standing firm through time, offering you a profound capacity for perseverance and understanding. You thrive in roles where your reliability and knowledge can shine, often becoming a source of guidance for others. This alignment indicates a path where your steadfastness and depth lead to lasting success and a legacy of trust.",
+                    sleepDirection: "Northeast",
+                    businessDirection: "Southwest"
+                },
+                9: {
+                    description: "With a Kua Number of 9, you are connected to the Fire element, symbolizing passion, visibility, and a radiant energy that illuminates your surroundings. This number suggests that your presence is dynamic and inspiring, much like a flame that draws attention and warms those nearby, driving you to stand out and pursue your ambitions with fervor. You excel in environments where your enthusiasm and creativity can shine, often leading others by example. This alignment enhances your vibrancy and influence, indicating a life path where your passion fuels remarkable achievements and recognition."
+                    sleepDirection: "South",
+                    businessDirection: "North"
+                }
+            };
+            return meanings[number];
+        }
+        function getSoulNumberMeaning(number) {
+            const meanings = {
+                1: "Your Soul Urge Number of 1 reveals a profound, exhilarating, and unyielding desire for independence, personal triumph, and self-determination that pulses at the very core of your being. Deep within your soul, you yearn to break free from constraints, to forge your own path through life with unwavering courage, and to achieve victories that bear your unique mark. This number signifies an inner drive to lead rather than follow, to assert your individuality in all you do, and to revel in the freedom of being the master of your own destiny. Your heart craves recognition for your efforts and the ability to stand tall as a beacon of strength and originality. However, this intense need for autonomy may sometimes lead you to resist collaboration or overlook the value of shared success. To truly fulfill your soul’s deepest longing, embrace your pioneering spirit while remaining open to the wisdom and support of others, allowing your remarkable independence to shine in harmony with the world around you.",
+                2: "With a Soul Urge Number of 2, your soul is imbued with a heartfelt, enduring, and tender longing for connection, peace, and emotional intimacy that defines your innermost essence. Deep down, you crave the warmth of meaningful relationships, the serenity of harmonious environments, and the profound joy of feeling understood and cherished by those you hold dear. This number reflects an inner yearning to nurture and be nurtured, to weave bonds of trust and empathy that bring comfort to both yourself and others. Your heart finds its truest fulfillment in acts of kindness, gentle support, and the creation of unity wherever discord exists. Yet, this sensitivity may sometimes make you overly accommodating or hesitant to assert your own needs. To satisfy your soul’s deepest desire, honor your gift for compassion while cultivating the strength to stand confidently in your own worth, ensuring that the peace you seek begins within you.",
+                3: "A Soul Urge Number of 3 unveils a vibrant, irrepressible, and joyous desire for creativity, self-expression, and the celebration of life that courses through your soul. At your core, you long to share the boundless beauty of your inner world—your ideas, emotions, and imagination—with others, whether through art, words, music, or the sheer radiance of your presence. This number signifies a heart that thrives on freedom and delight, yearning for opportunities to create, inspire, and bring light to even the darkest corners. Your deepest urge is to live a life where your spirit can dance freely, unburdened by restraint, and to see your joy reflected in the smiles of those around you. However, this passion may scatter your focus or lead you to shy away from life’s heavier responsibilities. To fulfill your soul’s calling, channel your creative energy into purposeful endeavors, balancing your exuberance with discipline to craft a life of lasting, authentic fulfillment.",
+                4: "Your Soul Urge Number of 4 reflects a deep, steadfast, and comforting desire for stability, security, and order that anchors your soul’s essence. Within you lies a profound yearning to build a life where everything has its place—a world of predictability, structure, and tangible rewards earned through diligent effort. This number suggests that your heart finds solace in routines, traditions, and the certainty of a well-laid foundation, craving the peace that comes from knowing you’ve created something enduring. Your inner drive is to establish a legacy of reliability and strength, both for yourself and those you care about. Yet, this need for control may sometimes make you resistant to change or overly rigid. To satisfy your soul’s longing, trust in your ability to construct while embracing flexibility, allowing your steady nature to flourish in an ever-evolving world.",
+                5: "With a Soul Urge Number of 5, your soul pulses with a restless, exhilarating, and insatiable desire for freedom, adventure, and variety that defines your very existence. Deep within, you crave a life unbound by limitations—a thrilling whirlwind of new experiences, uncharted places, and endless possibilities that keep your spirit alive and vibrant. This number reveals a heart that yearns for change and excitement, pushing you to break free from monotony and embrace the unknown with fearless abandon. Your deepest urge is to live spontaneously, to taste the richness of life’s diversity, and to revel in the liberty of being true to your ever-curious nature. However, this thirst for freedom may lead to impatience or a reluctance to commit. To quench your soul’s deepest longing, pursue adventure with purpose, balancing your love of liberty with moments of focus to create a life of meaningful exploration and joy.",
+                6: "A Soul Urge Number of 6 unveils a heartfelt, nurturing, and unwavering desire for love, harmony, and the well-being of others that lies at the core of your soul. Deep down, you long to create a sanctuary of beauty and care—a world where those you cherish can thrive under your protective and loving gaze. This number signifies an inner yearning to give generously, whether through acts of kindness, a warm home, or the soothing balm of your presence, finding your truest joy in uplifting those around you. Your heart craves peace in your relationships and a sense of purpose tied to service, often placing others’ needs above your own. Yet, this devotion may sometimes lead to over-responsibility or self-neglect. To fulfill your soul’s calling, embrace your nurturing essence while setting boundaries, ensuring your boundless love includes yourself in its embrace.",
+                7: "Your Soul Urge Number of 7 reveals a profound, contemplative, and insatiable desire for wisdom, truth, and spiritual understanding that drives your soul’s deepest aspirations. Within you burns a yearning to explore life’s mysteries—to retreat into solitude, reflect on the unseen, and connect with the vast expanse of knowledge and existence beyond the mundane. This number suggests a heart that craves intellectual and spiritual pursuits, finding solace in moments of insight that illuminate your path and bring you closer to the divine. Your inner drive is to uncover the hidden layers of reality, often seeking answers that others overlook. However, this quest may distance you from the everyday or trap you in overthinking. To satisfy your soul’s longing, honor your need for depth while sharing your revelations, weaving your journey into a life of purpose and enlightenment.",
+                8: "With a Soul Urge Number of 8, your soul harbors a powerful, relentless, and ambitious desire for success, recognition, and mastery over your destiny that fuels your innermost being. Deep within, you crave the thrill of achievement—to wield influence, amass wealth, and leave an indelible mark on the world through your strength and determination. This number signifies a heart that thrives on power and accomplishment, yearning to conquer challenges and rise to the pinnacle of your potential with unwavering resolve. Your deepest urge is to be seen as a force of impact, building a legacy that echoes your capability and vision. Yet, this drive may sometimes overshadow emotional connections. To fulfill your soul’s calling, pursue your ambitions with integrity, balancing material success with generosity to create a life of profound, lasting triumph.",
+                9: "A Soul Urge Number of 9 reflects a soul-stirring, compassionate, and visionary desire for idealism, service, and a higher purpose that defines your spiritual core. Deep down, you long to make a transformative difference—to heal, inspire, and uplift humanity with your creativity, empathy, and selfless devotion. This number reveals a heart that beats for the greater good, craving a life where your actions ripple outward to bring hope, beauty, and progress to countless lives. Your inner drive is to transcend personal gain, finding fulfillment in the pursuit of universal love and justice. However, this nobility may leave you drained or clinging to unattainable ideals. To satisfy your soul’s longing, focus your energy on tangible impact, letting go of what you cannot change to craft a life of extraordinary purpose and influence."
+            };
+            return meanings[number];
+        }
+        function getPersonalAnalysis(number) {
+            const analysis = {
+                1: {
+                    workDirection: "East",
+                    sleepDirection: "North",
+                    logoColors: "Red, Gold",
+                    dailyColors: "White, Yellow",
+                    luckyStone: "Ruby",
+                    jobSuggestion: "Entrepreneur, Leader, Innovator"
+                },
+                2: {
+                    workDirection: "Northeast",
+                    sleepDirection: "West",
+                    logoColors: "Blue, Green",
+                    dailyColors: "Pink, White",
+                    luckyStone: "Moonstone",
+                    jobSuggestion: "Counselor, Diplomat, Mediator"
+                },
+                3: {
+                    workDirection: "Southeast",
+                    sleepDirection: "East",
+                    logoColors: "Yellow, Orange",
+                    dailyColors: "Purple, Green",
+                    luckyStone: "Amethyst",
+                    jobSuggestion: "Artist, Writer, Performer"
+                },
+                4: {
+                    workDirection: "West",
+                    sleepDirection: "Northeast",
+                    logoColors: "Green, Brown",
+                    dailyColors: "Blue, Grey",
+                    luckyStone: "Emerald",
+                    jobSuggestion: "Engineer, Manager, Planner"
+                },
+                5: {
+                    workDirection: "North",
+                    sleepDirection: "South",
+                    logoColors: "Turquoise, Silver",
+                    dailyColors: "Red, Orange",
+                    luckyStone: "Aquamarine",
+                    jobSuggestion: "Traveler, Marketer, Explorer"
+                },
+                6: {
+                    workDirection: "Southwest",
+                    sleepDirection: "Northwest",
+                    logoColors: "Pink, Blue",
+                    dailyColors: "Green, Beige",
+                    luckyStone: "Rose Quartz",
+                    jobSuggestion: "Teacher, Caregiver, Designer"
+                },
+                7: {
+                    workDirection: "Northwest",
+                    sleepDirection: "South",
+                    logoColors: "Purple, White",
+                    dailyColors: "Blue, Violet",
+                    luckyStone: "Lapis Lazuli",
+                    jobSuggestion: "Researcher, Philosopher, Analyst"
+                },
+                8: {
+                    workDirection: "West",
+                    sleepDirection: "Northeast",
+                    logoColors: "Black, Gold",
+                    dailyColors: "Red, Brown",
+                    luckyStone: "Onyx",
+                    jobSuggestion: "Executive, Financier, Strategist"
+                },
+                9: {
+                    workDirection: "South",
+                    sleepDirection: "North",
+                    logoColors: "Red, Purple",
+                    dailyColors: "Orange, White",
+                    luckyStone: "Garnet",
+                    jobSuggestion: "Humanitarian, Artist, Visionary"
+                }
+            };
+            return analysis[number];
+        }
+        function getRelationshipAnalysis(number) {
+            const analysis = {
+                1: {
+                    future: "Your relationship is poised for dynamic growth and exciting developments, with both partners bringing a strong sense of individuality and ambition to the union, fostering a vibrant and evolving connection.",
+                    economic: "Together, you have strong potential for financial success, as your combined energies align with leadership and innovation, opening doors to prosperity through bold ventures.",
+                    advice: "To thrive, balance your independent spirits with teamwork, ensuring that both voices are heard and respected, allowing your relationship to flourish through mutual support and shared goals."
+                },
+                2: {
+                    future: "Expect a future of stable harmony and emotional depth, where your partnership grows through patience, understanding, and a shared commitment to creating a peaceful life together.",
+                    economic: "Financially, you’ll experience modest but consistent gains, built on cooperation and careful planning, ensuring a secure foundation over time.",
+                    advice: "Keep communication open and honest, as your strength lies in empathy and compromise—nurture this gentleness to maintain your bond’s serene strength."
+                },
+                3: {
+                    future: "Your relationship will sparkle with creative energy and joyful moments, as both of you bring playfulness and inspiration, crafting a future filled with shared passions and lively experiences.",
+                    economic: "Financial success may vary, with bursts of prosperity tied to creative pursuits—stay adaptable to navigate the ups and downs with optimism.",
+                    advice: "Focus on aligning your creative energies toward common goals, ensuring that your shared enthusiasm builds a lasting and fulfilling partnership."
+                },
+                4: {
+                    future: "A steady and reliable future awaits, where your relationship grows through mutual dedication and a shared commitment to building a secure, structured life together.",
+                    economic: "You’ll establish a solid financial base, as your practical approach and hard work create stability and long-term rewards for your partnership.",
+                    advice: "Embrace flexibility alongside your love of routine, allowing room for spontaneity to keep your connection vibrant while maintaining its strong foundation."
+                },
+                5: {
+                    future: "Your relationship promises exciting changes and adventurous turns, with both partners thriving on variety and freedom, creating a dynamic and ever-evolving bond.",
+                    economic: "Financially, outcomes may be unpredictable, with opportunities arising from bold risks—stay agile to capitalize on unexpected gains.",
+                    advice: "Adapt together to life’s shifts, ensuring that your shared love of freedom strengthens your connection rather than pulling you apart—communication is key."
+                },
+                6: {
+                    future: "A deep, nurturing bond lies ahead, where your relationship flourishes through love, care, and a mutual desire to support each other’s growth and happiness.",
+                    economic: "Together, you’ll enjoy shared prosperity, as your focus on mutual well-being and teamwork fosters financial security and abundance.",
+                    advice: "Support each other unconditionally, but set boundaries to avoid over-giving—your strength lies in balancing care for each other with self-care."
+                },
+                7: {
+                    future: "Your relationship will deepen through intellectual and spiritual connection, offering a future rich with shared exploration of life’s mysteries and mutual respect for independence.",
+                    economic: "Financial growth may be slow but steady, tied to thoughtful planning and unique insights—patience will yield rewards.",
+                                        advice: "Honor each other’s need for solitude and reflection, fostering a bond that thrives on intellectual stimulation and mutual respect for personal space—this balance will deepen your connection."
+                },
+                8: {
+                    future: "Your relationship is set for powerful growth and significant achievements, with both partners driven by ambition and a shared vision for success, creating a formidable and influential union.",
+                    economic: "Financially, you’re a powerhouse duo, with potential for substantial wealth through strategic decisions and mutual determination—focus on long-term goals.",
+                    advice: "Channel your shared ambition into collaborative efforts, ensuring that power dynamics remain balanced and that emotional intimacy complements your material pursuits."
+                },
+                9: {
+                    future: "A compassionate and inspiring future awaits, where your relationship serves a higher purpose, blending creativity and altruism to leave a positive mark on the world together.",
+                    economic: "Financially, you’ll find fulfillment in ventures that align with your ideals, with gains tied to meaningful causes rather than pure profit—patience will pay off.",
+                    advice: "Pursue your shared dreams with dedication, supporting each other’s visions while staying grounded—your strength lies in unity and a collective commitment to the greater good."
+                }
+            };
+            return analysis[number];
+        }
+    </script>
+</body>
+</html>

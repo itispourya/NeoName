@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحلیل اطلاعات شخصی</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container personal-analysis-app">
+        <h2 class="app-title">تحلیل اطلاعات شخصی</h2>
+        <form id="personal-analysis-form" method="POST" action="/wp-content/uploads/data/save-personal-analysis.php">
+            <div class="input-box">
+                <input type="text" name="firstName" id="firstName" placeholder="نام" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="lastName" id="lastName" placeholder="نام خانوادگی" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="day" id="day" placeholder="روز (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="month" id="month" placeholder="ماه (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="year" id="year" placeholder="سال (مثلاً 1370)" min="1300" max="1402" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="brandName" id="brandName" placeholder="نام مستعار" required>
+            </div>
+            <div class="input-box">
+                <select name="businessField" id="businessField" onchange="toggleCustomField()" required>
+                    <option value="">شغل</option>
+                    <option value="technology">فناوری</option>
+                    <option value="fashion">مد و پوشاک</option>
+                    <option value="food">مواد غذایی</option>
+                    <option value="services">خدمات</option>
+                    <option value="general">عمومی</option>
+                    <option value="other">دیگر موارد</option>
+                </select>
+            </div>
+            <div class="input-box" id="customFieldContainer" style="display: none;">
+                <input type="text" name="customField" id="customField" placeholder="دسته‌بندی شغلی خود را وارد کنید">
+            </div>
+            <button type="submit" class="submit-btn">تحلیل اطلاعات</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        const directions = {
+            1: { work: "شمال شرقی", sleep: "شرق" },
+            2: { work: "شمال غربی", sleep: "غرب" },
+            3: { work: "جنوب شرقی", sleep: "شرق" },
+            4: { work: "شمال", sleep: "جنوب شرقی" },
+            5: { work: "شمال شرقی", sleep: "شمال" },
+            6: { work: "غرب", sleep: "شمال غربی" },
+            7: { work: "شمال شرقی", sleep: "غرب" },
+            8: { work: "شمال شرقی", sleep: "شمال" },
+            9: { work: "شرق", sleep: "جنوب" }
+        };
+
+        const luckyColors = {
+            1: { logo: "قرمز، نارنجی", daily: "سفید، طلایی" },
+            2: { logo: "سبز، آبی", daily: "سفید، خاکستری" },
+            3: { logo: "زرد، نارنجی", daily: "سبز، آبی روشن" },
+            4: { logo: "قهوه‌ای، خاکستری", daily: "کرم، بژ" },
+            5: { logo: "طلایی، نقره‌ای", daily: "زرد، سفید" },
+            6: { logo: "صورتی، آبی روشن", daily: "سبز، سفید" },
+            7: { logo: "بنفش، خاکستری", daily: "آبی، سفید" },
+            8: { logo: "مشکی، آبی تیره", daily: "خاکستری، نقره‌ای" },
+            9: { logo: "قرمز، بنفش", daily: "زرد، نارنجی" }
+        };
+
+        const luckyStones = {
+            1: "یاقوت قرمز", 2: "زمرد", 3: "سیترین", 4: "عقیق قهوه‌ای", 5: "الماس",
+            6: "رز کوارتز", 7: "آمیتیست", 8: "اونیکس سیاه", 9: "گارنت"
+        };
+
+        const jobSuggestions = {
+            1: "مدیریت، فناوری، کارآفرینی",
+            2: "طراحی، مشاوره، خدمات اجتماعی",
+            3: "هنر، تبلیغات، بازاریابی",
+            4: "ساخت‌وساز، مهندسی، مدیریت پروژه",
+            5: "رسانه، تجارت بین‌المللی، فناوری اطلاعات",
+            6: "خدمات مشتریان، آموزش، طراحی داخلی",
+            7: "تحقیق، نویسندگی، مشاوره استراتژیک",
+            8: "مالی، سرمایه‌گذاری، مدیریت کسب‌وکار",
+            9: "فعالیت‌های اجتماعی، هنر، مشاوره روانشناسی"
+        };
+
+        function toggleCustomField() {
+            const businessField = document.getElementById('businessField').value;
+            const customFieldContainer = document.getElementById('customFieldContainer');
+            const customField = document.getElementById('customField');
+            customFieldContainer.style.display = businessField === 'other' ? 'block' : 'none';
+            customField.required = businessField === 'other';
+        }
+
+        document.getElementById('personal-analysis-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const day = parseInt(document.getElementById('day').value);
+            const month = parseInt(document.getElementById('month').value);
+            const year = parseInt(document.getElementById('year').value);
+            let businessField = document.getElementById('businessField').value;
+            const customField = document.getElementById('customField').value.trim();
+            const brandName = document.getElementById('brandName').value.trim();
+
+            if (!firstName || !lastName || !day || !month || !year || !businessField || !brandName || (businessField === 'other' && !customField)) {
+                showError("لطفاً تمام فیلدها را پر کنید.");
+                return;
+            }
+
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1300 || year > 1402) {
+                showError("لطفاً تاریخ معتبر وارد کنید.");
+                return;
+            }
+
+            if (businessField === 'other') {
+                businessField = customField;
+            }
+
+            const nameNumber = calculateNameNumber(firstName + lastName);
+            const birthNumber = calculateBirthNumber(day, month, year);
+            const combinedNumber = sumDigits(nameNumber + birthNumber);
+
+            const workDirection = directions[combinedNumber].work;
+            const sleepDirection = directions[combinedNumber].sleep;
+            const logoColors = luckyColors[combinedNumber].logo;
+            const dailyColors = luckyColors[combinedNumber].daily;
+            const luckyNumber = combinedNumber;
+            const luckyStone = luckyStones[combinedNumber];
+            const jobSuggestion = jobSuggestions[combinedNumber];
+
+            showError(`
+                <strong>تحلیل اعداد:</strong><br>
+                عدد نام شما: ${nameNumber}<br>
+                عدد تولد: ${birthNumber}<br>
+                عدد ترکیبی (شانس): ${luckyNumber}<br><br>
+                <strong>بهترین جهت برای کار:</strong> ${workDirection}<br>
+                <strong>بهترین جهت برای خواب:</strong> ${sleepDirection}<br>
+                <strong>رنگ‌های خوش‌یمن برای لوگو:</strong> ${logoColors}<br>
+                <strong>رنگ‌های خوش‌یمن برای زندگی روزمره:</strong> ${dailyColors}<br>
+                <strong>سنگ مناسب برای افزایش درآمد:</strong> ${luckyStone}<br>
+                <strong>زمینه شغلی پیشنهادی برای موفقیت بیشتر:</strong> ${jobSuggestion}<br>
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('personal-analysis-form'));
+            fetch('/wp-content/uploads/data/save-personal-analysis.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+            return sumDigits(total);
+        }
+
+        function calculateBirthNumber(day, month, year) {
+            const gregorianDate = jalaliToGregorian(year, month, day);
+            const gregorianYear = gregorianDate[0];
+            const yearSum = gregorianYear.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const total = day + month + yearSum;
+            return sumDigits(total);
+        }
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = parseInt(jy);
+            jm = parseInt(jm);
+            jd = parseInt(jd);
+
+            const jalaliDays = [
+                31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, (jy % 4 === 3 ? 30 : 29)
+            ];
+            let totalDays = 0;
+            for (let i = 0; i < jm - 1; i++) totalDays += jalaliDays[i];
+            totalDays += jd;
+
+            let gy = jy + 621;
+            let leapJ = -14;
+            let jp = totalDays;
+            let jump = jy % 4 === 3 ? 366 : 365;
+            let march = 20;
+
+            if (jp >= jump) {
+                jp -= jump;
+                gy++;
+            }
+
+            let gd = jp;
+            let gm = 3;
+            const daysInMonth = [
+                31, (gy % 4 === 0 && gy % 100 !== 0 || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+            ];
+
+            for (let i = 0; i < 12; i++) {
+                if (gd <= daysInMonth[i]) {
+                    gm = i + 1;
+                    break;
+                }
+                gd -= daysInMonth[i];
+            }
+
+            return [gy, gm, gd];
+        }
+    </script>
+</body>
+</html>

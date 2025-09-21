@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحلیل اعداد و پیشنهاد نام</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container name-analysis-app">
+        <h2 class="app-title">تحلیل اعداد و پیشنهاد نام</h2>
+        <form id="name-analysis-form" method="POST" action="/wp-content/uploads/data/save-name-analysis.php">
+            <div class="input-box">
+                <input type="text" name="userName" id="userName" placeholder="نام" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="motherName" id="motherName" placeholder="نام مادر" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="spouseName" id="spouseName" placeholder="نام همسر">
+            </div>
+            <div class="input-box">
+                <input type="number" name="day" id="day" placeholder="روز (1-31)" min="1" max="31" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="month" id="month" placeholder="ماه (1-12)" min="1" max="12" required>
+            </div>
+            <div class="input-box">
+                <input type="number" name="year" id="year" placeholder="سال (مثلاً 1360)" min="1300" max="1402" required>
+            </div>
+            <button type="submit" class="submit-btn">دریافت نام جدید</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'ا': 1, 'آ': 1, 'ب': 2, 'پ': 3, 'ت': 4, 'ث': 5, 'ج': 6, 'چ': 7, 'ح': 8, 'خ': 9,
+            'د': 10, 'ذ': 11, 'ر': 12, 'ز': 13, 'ژ': 14, 'س': 15, 'ش': 16, 'ص': 17, 'ض': 18,
+            'ط': 19, 'ظ': 20, 'ع': 21, 'غ': 22, 'ف': 23, 'ق': 24, 'ک': 25, 'گ': 26, 'ل': 27,
+            'م': 28, 'ن': 29, 'و': 30, 'ه': 31, 'ی': 32
+        };
+
+        document.getElementById('name-analysis-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const userName = document.getElementById('userName').value.trim();
+            const motherName = document.getElementById('motherName').value.trim();
+            const spouseName = document.getElementById('spouseName').value.trim();
+            const day = parseInt(document.getElementById('day').value);
+            const month = parseInt(document.getElementById('month').value);
+            const year = parseInt(document.getElementById('year').value);
+
+            if (!userName || !motherName || !day || !month || !year) {
+                showError("لطفاً تمام فیلدهای ضروری را پر کنید.");
+                return;
+            }
+
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1300 || year > 1402) {
+                showError("لطفاً تاریخ معتبر وارد کنید.");
+                return;
+            }
+
+            const userNumber = calculateNameNumber(userName);
+            const motherNumber = calculateNameNumber(motherName);
+            const spouseNumber = spouseName ? calculateNameNumber(spouseName) : 0;
+            const birthNumber = calculateBirthNumber(day, month, year);
+
+            showError(`
+                <strong>اعداد شما:</strong><br>
+                عدد نام شما: ${userNumber}<br>
+                عدد نام مادر: ${motherNumber}<br>
+                ${spouseName ? `عدد نام همسر: ${spouseNumber}<br>` : ''}
+                عدد تولد: ${birthNumber}<br><br>
+                <strong>مشکل اصلی خود را انتخاب کنید:</strong><br>
+                <select id="problem">
+                    <option value="">انتخاب کنید</option>
+                    <option value="financial">مشکلات مالی زیادی دارم</option>
+                    <option value="emotional">مشکلات احساسی دارم</option>
+                    <option value="business">مشکلاتی در کسب‌وکار دارم</option>
+                </select><br><br>
+                <button onclick="suggestName(${userNumber}, ${birthNumber})">تحلیل مشکل و پیشنهاد نام</button>
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('name-analysis-form'));
+            fetch('/wp-content/uploads/data/save-name-analysis.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function calculateNameNumber(name) {
+            let total = 0;
+            for (let char of name) {
+                if (letterToNumber[char]) {
+                    total += letterToNumber[char];
+                }
+            }
+            return sumDigits(total);
+        }
+
+        function calculateBirthNumber(day, month, year) {
+            const gregorianDate = jalaliToGregorian(year, month, day);
+            const gregorianYear = gregorianDate[0];
+            const yearSum = gregorianYear.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const total = day + month + yearSum;
+            return sumDigits(total);
+        }
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function suggestName(userNumber, birthNumber) {
+            const problem = document.getElementById('problem').value;
+            if (!problem) {
+                showError("لطفاً مشکل خود را انتخاب کنید.");
+                return;
+            }
+
+            const suitableNumbers = {
+                financial: [8, 4, 1],
+                emotional: [2, 6, 9],
+                business: [3, 7, 8]
+            };
+
+            const isSuitable = suitableNumbers[problem].includes(userNumber);
+            const suggestedNames = {
+                financial: ["فرهاد", "بهرام", "داریوش"],
+                emotional: ["نازنین", "مهران", "پریسا"],
+                business: ["کیان", "آرمان", "سهراب"]
+            };
+
+            if (isSuitable) {
+                showError(`
+                    <strong>تحلیل:</strong><br>
+                    عدد نام شما (${userNumber}) با مشکل ${getProblemText(problem)} سازگار است و نیازی به تغییر نام نیست.<br>
+                    با این حال، تمرکز بر انرژی مثبت و برنامه‌ریزی می‌تواند به حل مشکل کمک کند.
+                `);
+            } else {
+                const suggestedName = suggestedNames[problem][Math.floor(Math.random() * suggestedNames[problem].length)];
+                showError(`
+                    <strong>تحلیل:</strong><br>
+                    عدد نام شما (${userNumber}) با مشکل ${getProblemText(problem)} سازگاری ندارد.<br>
+                    پیشنهاد می‌شود نام جدیدی مانند "${suggestedName}" انتخاب کنید تا انرژی اعداد به حل مشکل شما کمک کند.<br>
+                    این نام می‌تواند تعادل بهتری در زندگی شما ایجاد کند.
+                `);
+            }
+        }
+
+        function getProblemText(problem) {
+            const problems = {
+                financial: "مالی",
+                emotional: "احساسی",
+                business: "کسب‌وکار"
+            };
+            return problems[problem];
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = parseInt(jy);
+            jm = parseInt(jm);
+            jd = parseInt(jd);
+
+            const jalaliDays = [
+                31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, (jy % 4 === 3 ? 30 : 29)
+            ];
+            let totalDays = 0;
+            for (let i = 0; i < jm - 1; i++) totalDays += jalaliDays[i];
+            totalDays += jd;
+
+            let gy = jy + 621;
+            let leapJ = -14;
+            let jp = totalDays;
+            let jump = jy % 4 === 3 ? 366 : 365;
+            let march = 20;
+
+            if (jp >= jump) {
+                jp -= jump;
+                gy++;
+            }
+
+            let gd = jp;
+            let gm = 3;
+            const daysInMonth = [
+                31, (gy % 4 === 0 && gy % 100 !== 0 || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+            ];
+
+            for (let i = 0; i < 12; i++) {
+                if (gd <= daysInMonth[i]) {
+                    gm = i + 1;
+                    break;
+                }
+                gd -= daysInMonth[i];
+            }
+
+            return [gy, gm, gd];
+        }
+    </script>
+</body>
+</html>

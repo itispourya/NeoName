@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه عدد روح</title>
+    <style>
+        .uniform-app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            border-radius: 20px;
+            background-color: #FFFFFF2E;
+            direction: rtl;
+            text-align: right;
+            color: white;
+            margin: 0 auto;
+        }
+        .app-title {
+            color: #ADFF00;
+            margin: 5px;
+            text-align: center;
+        }
+        .input-box {
+            position: relative;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .uniform-app-container input, .uniform-app-container select {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background-color: #F8FFE8C7;
+            color: #001B16;
+            direction: ltr;
+            text-align: center;
+        }
+        .uniform-app-container input::placeholder {
+            color: black;
+        }
+        .uniform-app-container input:focus::placeholder {
+            color: transparent;
+        }
+        .submit-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            display: block;
+            background-color: #ADFF00;
+            color: #001B16;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .submit-btn:hover {
+            color: black;
+        }
+        .error-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #001B16;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+        }
+        .error-window button {
+            margin-top: 10px;
+            background-color: #ADFF00;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <div class="uniform-app-container soul-number-app">
+        <h2 class="app-title">محاسبه عدد روح</h2>
+        <form id="soul-form" method="POST" action="/wp-content/uploads/data/save-soul-number.php">
+            <div class="input-box">
+                <input type="text" name="firstName" id="firstName" placeholder="نام (انگلیسی)" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="lastName" id="lastName" placeholder="نام خانوادگی (انگلیسی)" required>
+            </div>
+            <button type="submit" class="submit-btn">محاسبه</button>
+        </form>
+    </div>
+
+    <div id="error-window" class="error-window">
+        <div id="error-message"></div>
+        <button onclick="closeErrorWindow()">بستن</button>
+    </div>
+
+    <script>
+        const letterToNumber = {
+            'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9,
+            'j': 1, 'k': 2, 'l': 3, 'm': 4, 'n': 5, 'o': 6, 'p': 7, 'q': 8, 'r': 9,
+            's': 1, 't': 2, 'u': 3, 'v': 4, 'w': 5, 'x': 6, 'y': 7, 'z': 8
+        };
+
+        document.getElementById('soul-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // جلوگیری از رفرش صفحه
+
+            const firstName = document.getElementById('firstName').value.trim().toLowerCase();
+            const lastName = document.getElementById('lastName').value.trim().toLowerCase();
+
+            if (!firstName || !lastName) {
+                showError("لطفاً هر دو فیلد را تکمیل کنید.");
+                return;
+            }
+
+            const vowels = /[aeiou]/g;
+            let total = 0;
+            const fullName = firstName + lastName;
+            const vowelMatches = fullName.match(vowels) || [];
+
+            for (let vowel of vowelMatches) {
+                total += letterToNumber[vowel];
+            }
+
+            const soulNumber = sumDigits(total);
+            const meaning = getSoulNumberMeaning(soulNumber);
+
+            showError(`
+                <strong>عدد روح شما:</strong> ${soulNumber} <br><br>
+                <strong>تفسیر:</strong><br>
+                ${meaning}
+            `);
+
+            // ارسال اطلاعات به PHP بدون نمایش نتیجه ذخیره‌سازی
+            const formData = new FormData(document.getElementById('soul-form'));
+            fetch('/wp-content/uploads/data/save-soul-number.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('خطا در ارسال داده‌ها:', error));
+        });
+
+        function sumDigits(number) {
+            while (number >= 10 && number !== 11 && number !== 22) {
+                number = number.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return number;
+        }
+
+        function showError(message) {
+            const errorWindow = document.getElementById('error-window');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.innerHTML = message;
+            errorWindow.style.display = 'block';
+        }
+
+        function closeErrorWindow() {
+            const errorWindow = document.getElementById('error-window');
+            errorWindow.style.display = 'none';
+        }
+
+        function getSoulNumberMeaning(number) {
+            const meanings = {
+                1: "عدد ۱: استقلال و رهبری. تو آدمی هستی که دوست داری مستقل باشی و همیشه جلوتر از بقیه حرکت کنی. تو یه رهبر به دنیا اومدی و دوست داری کارها رو به روش خودت انجام بدی. آدمایی که عدد روحشون ۱ هستن، معمولاً خیلی قوی و با اراده هستن و دوست ندارن کسی براشون تصمیم بگیره. اونها همیشه دنبال این هستن که خودشون رو ثابت کنن و یه چیزی رو از خودشون به جا بذارن. البته گاهی ممکنه یه کم لجباز به نظر برسن، اما این فقط به خاطر اینه که میخوان مستقل باشن و کارها رو خودشون انجام بدن.",
+                2: "عدد ۲: هماهنگی و همکاری. تو آدمی هستی که دنبال صلح و آرامش هستی و دوست داری همه چیز تو تعادل باشه. تو خیلی خوب میتونی با دیگران کار کنی و همکاری کنی. آدمایی که عدد روحشون ۲ هستن، معمولاً خیلی دلسوز و مهربون هستن و دوست دارن به دیگران کمک کنن. اونها خیلی خوب میتونن احساسات دیگران رو درک کنن و همیشه سعی میکنن مشکلات رو با صحبت کردن و گفتگو حل کنن. البته گاهی ممکنه یه کم خجالتی به نظر برسن، اما این فقط به خاطر اینه که دوست دارن همه چیز آروم و بدون تنش پیش بره.",
+                3: "عدد ۳: خلاقیت و شادی. تو آدمی هستی که پر از انرژی و خلاقیت هستی و دوست داری خودت رو از طریق هنر و بیان خودت نشون بدی. تو همیشه دنبال چیزهای جدید و جالب هستی و دوست داری زندگی رو به یه جشن تبدیل کنی. آدمایی که عدد روحشون ۳ هستن، معمولاً خیلی باهوش و با استعداد هستن و میتونن تو هر کاری که دوست دارن موفق بشن. اونها خیلی اجتماعی هستن و دوست دارن با دیگران ارتباط برقرار کنن. البته گاهی ممکنه یه کم حواس پرت به نظر برسن، اما این فقط به خاطر اینه که ذهنشون همیشه پر از ایده‌های جدیده.",
+                4: "عدد ۴: ثبات و نظم. تو آدمی هستی که به سخت‌کوشی و نظم اعتقاد داری و دوست داری همه چیز تو زندگی مرتب و منظم باشه. تو خیلی خوب میتونی برنامه‌ریزی کنی و کارها رو به موقع انجام بدی. آدمایی که عدد روحشون ۴ هستن، معمولاً خیلی قابل اعتماد و مسئولیت‌پذیر هستن و همیشه به قولشون عمل میکنن. اونها خیلی خوب میتونن مشکلات رو حل کنن و همیشه دنبال این هستن که یه پایه محکم برای زندگیشون بسازن. البته گاهی ممکنه یه کم سخت‌گیر به نظر برسن، اما این فقط به خاطر اینه که میخوان همه چیز درست و دقیق انجام بشه.",
+                5: "عدد ۵: آزادی و ماجراجویی. تو آدمی هستی که عاشق آزادی و تغییر هستی و دوست داری همیشه تو حرکت باشی. تو خیلی کنجکاو هستی و دوست داری چیزهای جدید رو تجربه کنی. آدمایی که عدد روحشون ۵ هستن، معمولاً خیلی پر انرژی و شاد هستن و همیشه دنبال هیجان هستن. اونها خیلی خوب میتونن خودشون رو با شرایط جدید وفق بدن و همیشه دنبال فرصت‌های جدید هستن. البته گاهی ممکنه یه کم بی‌قرار به نظر برسن، اما این فقط به خاطر اینه که دوست دارن همیشه تو حال کشف چیزهای جدید باشن.",
+                6: "عدد ۶: عشق و مسئولیت. تو آدمی هستی که عاشق کمک کردن به دیگران هستی و دوست داری از کسایی که دوستشون داری مراقبت کنی. تو خیلی دلسوز و مهربون هستی و همیشه سعی میکنی به دیگران کمک کنی. آدمایی که عدد روحشون ۶ هستن، معمولاً خیلی خانواده‌دوست هستن و دوست دارن یه محیط گرم و صمیمی برای خودشون و عزیزاشون بسازن. اونها خیلی خوب میتونن به دیگران احساس امنیت بدن و همیشه دنبال این هستن که دنیا رو به جای بهتری تبدیل کنن. البته گاهی ممکنه یه کم وسواس به نظر برسن، اما این فقط به خاطر اینه که میخوان همه چیز عالی و کامل باشه.",
+                7: "عدد ۷: خرد و درون‌گرایی. تو آدمی هستی که عاشق یادگیری و کشف حقایق زندگی هستی و دوست داری همیشه بیشتر بدونی. تو خیلی عمیق و متفکر هستی و دوست داری همه چیز رو تحلیل کنی. آدمایی که عدد روحشون ۷ هستن، معمولاً خیلی باهوش و کنجکاو هستن و همیشه دنبال جواب سوالاتشون هستن. اونها خیلی خوب میتونن تو تنهایی به خودشون فکر کنن و به چیزهای بزرگ برسن. البته گاهی ممکنه یه کم گوشه‌گیر به نظر برسن، اما این فقط به خاطر اینه که دوست دارن بیشتر وقتشون رو صرف فکر کردن و یادگیری کنن.",
+                8: "عدد ۸: قدرت و موفقیت. تو آدمی هستی که عاشق موفقیت و پیشرفته و دوست داری تو زندگی به چیزهای بزرگ برسی. تو خیلی بلندپرواز و مصمم هستی و همیشه دنبال این هستی که بهترین باشی. آدمایی که عدد روحشون ۸ هستن، معمولاً خیلی قوی و با اراده هستن و میتونن تو هر کاری که دوست دارن موفق بشن. اونها خیلی خوب میتونن مدیریت کنن و همیشه دنبال این هستن که به اهدافشون برسن. البته گاهی ممکنه یه کم مادی‌گرا به نظر برسن، اما این فقط به خاطر اینه که میخوان تو زندگی به ثبات و امنیت برسن.",
+                9: "عدد ۹: مهربانی و انسان‌دوستی. تو آدمی هستی که قلب بزرگی داری و دوست داری به دیگران کمک کنی. تو خیلی دلسوز و مهربون هستی و همیشه دنبال این هستی که دنیا رو به جای بهتری تبدیل کنی. آدمایی که عدد روحشون ۹ هستن، معمولاً خیلی بخشنده و فداکار هستن و دوست دارن به دیگران خدمت کنن. اونها خیلی خوب میتونن احساسات دیگران رو درک کنن و همیشه دنبال این هستن که به دیگران کمک کنن. البته گاهی ممکنه یه کم احساساتی به نظر برسن، اما این فقط به خاطر اینه که قلبشون خیلی بزرگه و دوست دارن به همه کمک کنن.",
+                11: "عدد ۱۱: بینش معنوی. تو آدمی هستی که خیلی شهودی و الهام‌بخش هستی و دوست داری دیگران رو به سمت چیزهای خوب هدایت کنی. تو خیلی باهوش و حساس هستی و میتونی چیزهایی رو ببینی که دیگران نمیبینن. آدمایی که عدد روحشون ۱۱ هستن، معمولاً خیلی خلاق و الهام‌بخش هستن و میتونن دیگران رو به سمت چیزهای بزرگ هدایت کنن. اونها خیلی خوب میتونن احساسات دیگران رو درک کنن و همیشه دنبال این هستن که دنیا رو به جای بهتری تبدیل کنن. البته گاهی ممکنه یه کم خیال‌پرداز به نظر برسن، اما این فقط به خاطر اینه که ذهنشون خیلی خلاقه و میتونن چیزهای بزرگ رو تصور کنن.",
+                22: "عدد ۲۲: سازنده بزرگ. تو آدمی هستی که قدرت این رو داری که چیزهای بزرگ و ماندگار خلق کنی. تو خیلی بلندپرواز و مصمم هستی و میتونی به چیزهایی برسی که دیگران فکر میکنن غیرممکنه. آدمایی که عدد روحشون ۲۲ هستن، معمولاً خیلی قوی و با اراده هستن و میتونن تو هر کاری که دوست دارن موفق بشن. اونها خیلی خوب میتونن برنامه‌ریزی کنن و همیشه دنبال این هستن که چیزهای بزرگ خلق کنن. البته گاهی ممکنه یه کم کمال‌گرا به نظر برسن، اما این فقط به خاطر اینه که میخوان بهترین نتیجه رو بگیرن."
+            };
+            return meanings[number] || "عدد وارد شده معتبر نیست. لطفاً دوباره بررسی کنید.";
+        }
+    </script>
+</body>
+</html>
